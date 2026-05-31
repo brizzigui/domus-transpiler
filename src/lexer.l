@@ -1,86 +1,74 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-
-void print_token(const char *type, const char *value)
-{
-    printf("%-20s %s\n", type, value);
-}
 %}
 
 %option noyywrap
+%option yylineno
+
+TIME        [0-9]{2}:[0-9]{2}:[0-9]{2}
+DURATION    [0-9]{2}h[0-9]{2}m[0-9]{2}s([0-9]{2,3}ms)?
+ATOM        [A-Za-z0-9_][A-Za-z0-9_.-]*
 
 %%
 
-"create"                { print_token("CREATE", yytext); }
-"id"                    { print_token("ID", yytext); }
-"description"           { print_token("DESCRIPTION", yytext); }
-"mode"                  { print_token("MODE", yytext); }
+[ \t\r\n]+                 ;
 
-"listen"                { print_token("LISTEN", yytext); }
-"when"                  { print_token("WHEN", yytext); }
-"do"                    { print_token("DO", yytext); }
+"#".*                      ;
+"//".*                     ;
 
-"if"                    { print_token("IF", yytext); }
-"else"                  { print_token("ELSE", yytext); }
+"create"                   { printf("CREATE               %s\n", yytext); }
+"id"                       { printf("ID                   %s\n", yytext); }
+"description"              { printf("DESCRIPTION          %s\n", yytext); }
+"mode"                     { printf("MODE                 %s\n", yytext); }
 
-"and"                   { print_token("AND", yytext); }
-"or"                    { print_token("OR", yytext); }
+"listen"                   { printf("LISTEN               %s\n", yytext); }
+"when"                     { printf("WHEN                 %s\n", yytext); }
+"do"                       { printf("DO                   %s\n", yytext); }
 
-"state"                 { print_token("STATE", yytext); }
-"device"                { print_token("DEVICE", yytext); }
-"sun"                   { print_token("SUN", yytext); }
-"time"                  { print_token("TIME", yytext); }
-"trigger"               { print_token("TRIGGER", yytext); }
+"if"                       { printf("IF                   %s\n", yytext); }
+"else"                     { printf("ELSE                 %s\n", yytext); }
 
-"entity_id"             { print_token("ENTITY_ID", yytext); }
-"device_id"             { print_token("DEVICE_ID", yytext); }
+"and"                      { printf("AND                  %s\n", yytext); }
+"or"                       { printf("OR                   %s\n", yytext); }
+"not"                      { printf("NOT                  %s\n", yytext); }
 
-"service"               { print_token("SERVICE", yytext); }
-"target"                { print_token("TARGET", yytext); }
-"data"                  { print_token("DATA", yytext); }
+"state"                    { printf("STATE                %s\n", yytext); }
+"time"                     { printf("TIME                 %s\n", yytext); }
 
-"["                     { print_token("LBRACKET", yytext); }
-"]"                     { print_token("RBRACKET", yytext); }
+"device_id"               { printf("DEVICE_ID            %s\n", yytext); }
+"entity_id"               { printf("ENTITY_ID            %s\n", yytext); }
 
-"("                     { print_token("LPAREN", yytext); }
-")"                     { print_token("RPAREN", yytext); }
+"["                        { printf("LBRACKET             [\n"); }
+"]"                        { printf("RBRACKET             ]\n"); }
 
-"{"                     { print_token("LBRACE", yytext); }
-"}"                     { print_token("RBRACE", yytext); }
+"("                        { printf("LPAREN               (\n"); }
+")"                        { printf("RPAREN               )\n"); }
 
-":"                     { print_token("COLON", yytext); }
-","                     { print_token("COMMA", yytext); }
+":"                        { printf("COLON                :\n"); }
+","                        { printf("COMMA                ,\n"); }
 
-[0-9]{2}:[0-9]{2}:[0-9]{2} {
-    print_token("TIME_LITERAL", yytext);
+{TIME} {
+    printf("TIME_LITERAL         %s\n", yytext);
 }
 
--?[0-9]+h[0-9]+m[0-9]+s([0-9]+ms)? {
-    print_token("DURATION", yytext);
+{DURATION} {
+    printf("DURATION             %s\n", yytext);
 }
 
-\"([^\\\"]|\\.)*\" {
-    print_token("STRING", yytext);
+\'([^\\\']|\\.)*\' {
+    printf("STRING               %s\n", yytext);
 }
 
-[0-9]+(\.[0-9]+)? {
-    print_token("NUMBER", yytext);
+{ATOM} {
+    printf("IDENTIFIER           %s\n", yytext);
 }
-
-[a-zA-Z_][a-zA-Z0-9_.-]* {
-    print_token("IDENTIFIER", yytext);
-}
-
-[ \t\r\n]+ ;
 
 . {
-    printf("UNKNOWN             %s\n", yytext);
+    printf("UNKNOWN              %s\n", yytext);
 }
 
 %%
-
 int main(void)
 {
     yylex();
