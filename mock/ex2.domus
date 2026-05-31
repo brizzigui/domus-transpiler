@@ -1,0 +1,85 @@
+create 'Por do Sol':
+    id 1722807263818
+    description 'Liga dispositivos em horários diferentes dependendo do clima (Chuva: -1h30, Nublado: -1h15, Sol: -45min)'
+    mode single
+
+    listen [
+        (
+            sun 
+            event sunset
+            offset -01h30m00s
+            id chuva
+        ),
+
+        (
+            sun 
+            event sunset
+            offset -01h15m00s
+            id nublado
+        ),
+
+        (
+            sun 
+            event sunset
+            offset -00h45m00s
+            id sol
+        )
+    ]
+
+    when [
+        (
+            entity_id alarm_control_panel.alarmo
+            state is disarmed
+        )
+    ]
+
+    do [
+        (
+            if [
+                (
+                    entity_id weather.forecast_casa
+                    state is any [
+                        rainy,
+                        pouring,
+                        lightning-rainy,
+                        hail,
+                        snowy
+                    ]
+                )
+            ]
+                automation trigger
+                entity_id automation.cozinha_ligar_luzes
+                skip_condition true
+
+            else if [
+                (
+                    entity_id weather.forecast_casa
+                    state is any [
+                        cloudy,
+                        windy-variant,
+                        fog,
+                        partlycloudy,
+                        windy
+                    ]
+                )
+                and
+                (
+                    device_id b367687260d5c280782ca2662bc32784
+                    entity_id eff0606bc3425bb3266f319ae937d810
+                    switch is_off
+                )
+            ]
+                automation trigger
+                entity_id automation.cozinha_ligar_luzes
+                skip_condition true
+
+            else if [
+                (
+                    trigger is sol
+                )
+            ]
+                automation trigger
+                entity_id automation.cozinha_ligar_luzes
+                skip_condition true
+        )
+    ]

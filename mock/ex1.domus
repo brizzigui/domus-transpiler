@@ -1,0 +1,51 @@
+create 'Corda Corredor - movimento':
+    id auto
+    description ''
+    mode restart
+    listen [
+        (
+            state
+            changes to on
+            with entities [
+                binary_sensor.corredor_suite_luminance_motion_sensor_movimento,
+                binary_sensor.tz3000_6ygjfyll_ts0202,
+                binary_sensor.motion_sensor_movimento
+            ]
+        )
+    ]
+    when [
+        (
+            device_id 17577b83efd0951c4002cd6c7b91053c
+            entity_id bb97c45f407329aca067d3f274499a81
+            switch is_on
+        ),
+
+        (
+            device_id 5e51e34745f04cf7f80d7a374d922d6f
+            entity_id 37dc24654a788314bfb4de2e2c827fd0
+            alarm_control_panel is_disarmed
+        ),
+
+        (
+            entity_id light.corda_led_corredor
+            state is off
+        )
+    ]
+    do [
+        (
+            light turn_on
+            device_id fbbfb3abd57bee6b19cc076ec0fd1b49
+            entity_id a4595b3013d5c452494f933e1e104129
+        ),
+        (
+            if time after 01:15:00 and time before 12:00:00
+                delay 00h00m45s00ms
+            else
+                delay 00h01m45s00ms
+        ),
+        (
+            light turn_off
+            device_id fbbfb3abd57bee6b19cc076ec0fd1b49
+            entity_id a4595b3013d5c452494f933e1e104129
+        )
+    ]
