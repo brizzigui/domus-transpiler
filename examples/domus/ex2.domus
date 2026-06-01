@@ -1,5 +1,5 @@
 create 'Por do Sol':
-    id 1722807263818
+    id auto
     description 'Liga dispositivos em horários diferentes dependendo do clima (Chuva: -1h30, Nublado: -1h15, Sol: -45min)'
     mode single
 

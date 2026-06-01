@@ -40,7 +40,3 @@ IDList -> IDENTIFIER ',' IDList | IDENTIFIER
 Value -> 'auto' | NUMBER | STRING
 
 Terminals: STRING (quoted), IDENTIFIER (atoms), NUMBER, TIME, DURATION, punctuation
-
-This BNF describes the structure used in the mock examples: automations with fields
-`id`, `description`, `mode`, `listen` (triggers), `when` (conditions) and `do` (actions),
-including nested `if`/`else` actions, lists, times and durations.

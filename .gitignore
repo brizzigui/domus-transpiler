@@ -4,3 +4,4 @@ lexer
 *.log
 *.tab.c
 *.tab.h
+*.output
