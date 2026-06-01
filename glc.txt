@@ -1,418 +1,46 @@
-<automation> ::=
-    "create" <string> ":"
-        <automation_body>
-    | <automation> <automation>
+Grammar (GLC) for .domus language
 
-<automation_body> ::=
-        <id_decl>
-        <description_decl>
-        <mode_decl>
-        <listen_decl>
-        <when_decl>
-        <do_decl>
+Program -> Automations
+Automations -> Automation Automations | epsilon
 
-<id_decl> ::=
-    "id" <identifier>
+Automation -> 'create' STRING ':' Fields
+Fields -> Field Fields | epsilon
 
-<description_decl> ::=
-    "description" <string>
+Field -> 'id' Value
+       | 'description' STRING
+       | 'mode' IDENTIFIER
+       | 'listen' '[' ListenItems ']'
+       | 'when' '[' ConditionItems ']'
+       | 'do' '[' ActionItems ']'
 
-<mode_decl> ::=
-    "mode"
-    (
-        "single"
-      | "restart"
-      | "queued"
-      | "parallel"
-    )
+ListenItems -> '(' AttrList ')' MoreListenItems | epsilon
+MoreListenItems -> ',' '(' AttrList ')' MoreListenItems | epsilon
 
-<listen_decl> ::=
-    "listen"
-    "["
-        <trigger_list>
-    "]"
+ConditionItems -> '(' AttrList ')' MoreConditionItems | epsilon
+MoreConditionItems -> ',' '(' AttrList ')' MoreConditionItems | epsilon
 
-<trigger_list> ::=
-      <trigger>
-    | <trigger> "," <trigger_list>
+ActionItems -> '(' ActionBody ')' MoreActionItems | epsilon
+MoreActionItems -> ',' '(' ActionBody ')' MoreActionItems | epsilon
 
-<trigger> ::=
-    "("
-        <trigger_body>
-    ")"
+ActionBody -> IfAction | SimpleAction
+IfAction -> 'if' IfCond ThenBlock ElsePart
+IfCond -> AttrList | '[' ConditionItems ']'
+ThenBlock -> ActionSequence
+ElsePart -> 'else' ActionSequence | 'else' IfAction | epsilon
 
-<trigger_body> ::=
-      <state_trigger>
-    | <sun_trigger>
-    | <time_trigger>
-    | <device_trigger>
-    | <numeric_trigger>
+SimpleAction -> IDENTIFIER ActionRest
+ActionRest -> AttrList | AttrList ',' ActionRest | epsilon
 
-<state_trigger> ::=
-    "state"
-    [ "id" <identifier> ]
-    [ "changes" ]
-    [ "from" <state_value> ]
-    [ "to" <state_value> ]
-    "with"
-    "entities"
-    "["
-        <entity_list>
-    "]"
+AttrList -> Attr AttrList | epsilon
+Attr -> IDENTIFIER AttrValue
+AttrValue -> STRING | IDENTIFIER | NUMBER | TIME | DURATION | '[' IDList ']' | epsilon
 
-<sun_trigger> ::=
-    "sun"
-    "event"
-    (
-        "sunrise"
-      | "sunset"
-    )
-    [ "offset" <duration> ]
-    [ "id" <identifier> ]
+IDList -> IDENTIFIER ',' IDList | IDENTIFIER
 
-<time_trigger> ::=
-    "time"
-    "at"
-    <time>
-    [ "id" <identifier> ]
+Value -> 'auto' | NUMBER | STRING
 
-<device_trigger> ::=
-    "device"
-    "device_id"
-    <identifier>
-    "entity_id"
-    <identifier>
-    <device_trigger_type>
-    [ "for" <duration> ]
-    [ "id" <identifier> ]
+Terminals: STRING (quoted), IDENTIFIER (atoms), NUMBER, TIME, DURATION, punctuation
 
-<numeric_trigger> ::=
-    "numeric"
-    [ "device_id" <identifier> ]
-    "entity_id"
-    <identifier>
-    (
-        "above" <number>
-      | "below" <number>
-    )
-    [ "id" <identifier> ]
-
-<device_trigger_type> ::=
-      "turned_on"
-    | "turned_off"
-    | "opened"
-    | "closed"
-    | "motion"
-    | "occupancy"
-
-<when_decl> ::=
-    "when"
-    "["
-        [ <condition_expr> ]
-    "]"
-
-<condition_expr> ::=
-      <condition>
-    | <condition> "and" <condition_expr>
-    | <condition> "or" <condition_expr>
-
-<condition> ::=
-      <state_condition>
-    | <multi_state_condition>
-    | <device_condition>
-    | <trigger_condition>
-    | <trigger_group_condition>
-    | <time_condition>
-    | <sun_condition>
-
-<state_condition> ::=
-    "("
-        "entity_id"
-        <entity>
-        "state"
-        "is"
-        <state_value>
-    ")"
-
-<multi_state_condition> ::=
-    "("
-        "entity_id"
-        <entity>
-        "state"
-        "is"
-        "any"
-        "["
-            <value_list>
-        "]"
-    ")"
-
-<device_condition> ::=
-    "("
-        "device_id"
-        <identifier>
-
-        "entity_id"
-        <identifier>
-
-        <domain>
-
-        (
-            "is_on"
-          | "is_off"
-          | "is_disarmed"
-          | "is_armed"
-          | "is_open"
-          | "is_closed"
-        )
-    ")"
-
-<trigger_condition> ::=
-    "("
-        "trigger"
-        "is"
-        <identifier>
-    ")"
-
-<trigger_group_condition> ::=
-    "("
-        "trigger"
-        "is"
-        "any"
-        "["
-            <identifier_list>
-        "]"
-    ")"
-
-<time_condition> ::=
-    "("
-        "time"
-        "after"
-        <time>
-        "before"
-        <time>
-    ")"
-
-<sun_condition> ::=
-    "("
-        "sun"
-        "after"
-        (
-            "sunrise"
-          | "sunset"
-        )
-        "before"
-        (
-            "sunrise"
-          | "sunset"
-        )
-    ")"
-
-<do_decl> ::=
-    "do"
-    "["
-        <action_list>
-    "]"
-
-<action_list> ::=
-      <action>
-    | <action> "," <action_list>
-
-<action> ::=
-      <device_action>
-    | <delay_action>
-    | <timer_action>
-    | <automation_trigger_action>
-    | <notify_action>
-    | <service_call_action>
-    | <if_action>
-
-<device_action> ::=
-    "("
-        <domain>
-
-        (
-            "turn_on"
-          | "turn_off"
-          | "toggle"
-        )
-
-        [ "device_id" <identifier> ]
-
-        "entity_id"
-        <entity_or_list>
-
-        [ "brightness_pct" <number> ]
-    ")"
-
-<delay_action> ::=
-    "("
-        "delay"
-        <duration>
-    ")"
-
-<timer_action> ::=
-    "("
-        "timer"
-
-        (
-            "start"
-          | "finish"
-          | "cancel"
-        )
-
-        "entity_id"
-        <entity_or_list>
-    ")"
-
-<automation_trigger_action> ::=
-    "("
-        "automation"
-        "trigger"
-
-        "entity_id"
-        <entity>
-
-        [ "skip_condition" <boolean> ]
-    ")"
-
-<notify_action> ::=
-    "("
-        "notify"
-
-        "service"
-        <entity>
-
-        "message"
-        <string>
-
-        [ "title" <string> ]
-    ")"
-
-<service_call_action> ::=
-    "("
-        "call"
-
-        "service"
-        <entity>
-
-        [
-            "target"
-            "["
-                <entity_list>
-            "]"
-        ]
-
-        [
-            "data"
-            "{"
-                <property_list>
-            "}"
-        ]
-    ")"
-
-<if_action> ::=
-    "("
-        <if_stmt>
-    ")"
-
-<if_stmt> ::=
-    "if"
-    "["
-        <condition_expr>
-    "]"
-
-    <action_block>
-
-    {
-        "else if"
-
-        "["
-            <condition_expr>
-        "]"
-
-        <action_block>
-    }
-
-    [
-        "else"
-        <action_block>
-    ]
-
-<action_block> ::=
-      <action>
-    | "["
-        <action_list>
-      "]"
-
-<entity_or_list> ::=
-      <entity>
-    | "["
-        <entity_list>
-      "]"
-
-<entity_list> ::=
-      <entity>
-    | <entity> "," <entity_list>
-
-<identifier_list> ::=
-      <identifier>
-    | <identifier> "," <identifier_list>
-
-<value_list> ::=
-      <state_value>
-    | <state_value> "," <value_list>
-
-<property_list> ::=
-      <property>
-    | <property> "," <property_list>
-
-<property> ::=
-    <identifier>
-    ":"
-    <literal>
-
-<literal> ::=
-      <string>
-    | <number>
-    | <boolean>
-    | <identifier>
-
-<domain> ::=
-      "light"
-    | "switch"
-    | "cover"
-    | "media_player"
-    | "alarm_control_panel"
-    | "binary_sensor"
-    | "sensor"
-    | "timer"
-    | "automation"
-    | "notify"
-    | "weather"
-    | <identifier>
-
-<entity> ::=
-    <identifier>
-
-<state_value> ::=
-      <identifier>
-    | <string>
-
-<boolean> ::=
-      "true"
-    | "false"
-
-<duration> ::=
-    DURATION
-
-<time> ::=
-    TIME
-
-<string> ::=
-    STRING
-
-<number> ::=
-    NUMBER
-
-<identifier> ::=
-    IDENTIFIER
+This BNF describes the structure used in the mock examples: automations with fields
+`id`, `description`, `mode`, `listen` (triggers), `when` (conditions) and `do` (actions),
+including nested `if`/`else` actions, lists, times and durations.

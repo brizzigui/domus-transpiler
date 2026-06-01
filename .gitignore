@@ -1,3 +1,6 @@
 *.yy.c
 lexer
 *.exe
+*.log
+*.tab.c
+*.tab.h
