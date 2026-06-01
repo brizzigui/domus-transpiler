@@ -33,6 +33,9 @@ ATOM        [A-Za-z0-9_][A-Za-z0-9_.-]*
 "or"                       { printf("OR                   %s\n", yytext); }
 "not"                      { printf("NOT                  %s\n", yytext); }
 
+"after"                    { printf("AFTER                %s\n", yytext); }
+"before"                   { printf("BEFORE               %s\n", yytext); }
+
 "state"                    { printf("STATE                %s\n", yytext); }
 "time"                     { printf("TIME                 %s\n", yytext); }
 
@@ -47,6 +50,10 @@ ATOM        [A-Za-z0-9_][A-Za-z0-9_.-]*
 
 ":"                        { printf("COLON                :\n"); }
 ","                        { printf("COMMA                ,\n"); }
+
+"-"                        { printf("MINUS                -\n"); }
+"+"                        { printf("PLUS                 +\n"); }
+
 
 {TIME} {
     printf("TIME_LITERAL         %s\n", yytext);
