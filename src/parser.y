@@ -130,6 +130,11 @@ attr:
     | TIMEKW AFTER TIME_LITERAL { $$ = ast_new_attr("time_after", $3); }
     | TIMEKW BEFORE TIME_LITERAL { $$ = ast_new_attr("time_before", $3); }
     | STATEKW CHANGES TO IDENTIFIER { $$ = ast_new_attr("state", $4); }
+    | STATEKW CHANGES TO STRING {
+        char *quoted = malloc(strlen($4) + 3); /* ' + string + ' + \0 */
+        sprintf(quoted, "'%s'", $4);
+        $$ = ast_new_attr("state", quoted);
+    }
     | SUN { $$ = ast_new_attr("sun", NULL); }
     | EVENT IDENTIFIER { $$ = ast_new_attr("event", $2); }
     | ID IDENTIFIER { $$ = ast_new_attr("id", $2); }
@@ -139,6 +144,7 @@ attr:
     | IDENTIFIER LBRACKET id_list RBRACKET { $$ = ast_new_attr($1, $3); }
     | IDENTIFIER IS IDENTIFIER LBRACKET id_list RBRACKET { size_t n = strlen($3) + 1 + strlen($5) + 1; char *buf = malloc(n); strcpy(buf, $3); strcat(buf, ","); strcat(buf, $5); $$ = ast_new_attr($1, buf); free(buf); }
     | STATEKW IS IDENTIFIER LBRACKET id_list RBRACKET { size_t n = strlen($3) + 1 + strlen($5) + 1; char *buf = malloc(n); strcpy(buf, $3); strcat(buf, ","); strcat(buf, $5); $$ = ast_new_attr("state", buf); free(buf); }
+    | STATEKW IS STRING LBRACKET id_list RBRACKET { size_t n = strlen($3) + strlen($5) + 4; char *buf = malloc(n); sprintf(buf, "'%s',%s", $3, $5); $$ = ast_new_attr("state", buf); free(buf);}
     | OFFSET DURATION_LITERAL { $$ = ast_new_attr("offset", $2); }
     | SKIP_CONDITION IDENTIFIER { $$ = ast_new_attr("skip_condition", $2); }
     | CHANGES TO IDENTIFIER { $$ = ast_new_attr("changes_to", $3); }

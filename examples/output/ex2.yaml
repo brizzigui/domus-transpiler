@@ -1,0 +1,63 @@
+- id: 'auto'
+  alias: Por do Sol
+  description: 'Liga dispositivos em horários diferentes dependendo do clima (Chuva: -1h30, Nublado: -1h15, Sol: -45min)'
+  mode: single
+  triggers:
+  - trigger: sun
+    event: sunset
+    offset: -01h30m00s
+    id: chuva
+  - trigger: sun
+    event: sunset
+    offset: -01h15m00s
+    id: nublado
+  - trigger: sun
+    event: sunset
+    offset: -00h45m00s
+    id: sol
+  conditions:
+  - condition: state
+    entity_id: alarm_control_panel.alarmo
+    state: disarmed
+  actions:
+    - if:
+      - condition: state
+        entity_id: weather.forecast_casa
+        state:
+          - any
+          - rainy
+          - pouring
+          - lightning-rainy
+          - hail
+          - snowy
+      then:
+        - action: automation.trigger
+          target.entity_id: automation.cozinha_ligar_luzes
+          data.skip_condition: true
+      else:
+        - if:
+          - condition: state
+            entity_id: weather.forecast_casa
+            state:
+              - any
+              - cloudy
+              - windy-variant
+              - fog
+              - partlycloudy
+              - windy
+          - condition: device
+            device_id: b367687260d5c280782ca2662bc32784
+            entity_id: eff0606bc3425bb3266f319ae937d810
+            type: is_off
+            domain: switch
+          then:
+            - action: automation.trigger
+              target.entity_id: automation.cozinha_ligar_luzes
+              data.skip_condition: true
+          else:
+            - if:
+              - condition: trigger
+              then:
+                - action: automation.trigger
+                  target.entity_id: automation.cozinha_ligar_luzes
+                  data.skip_condition: true

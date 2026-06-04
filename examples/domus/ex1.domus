@@ -5,12 +5,19 @@ create 'Corda Corredor - movimento':
     listen [
         (
             state
-            changes to on
-            with entities [
-                binary_sensor.corredor_suite_luminance_motion_sensor_movimento,
-                binary_sensor.tz3000_6ygjfyll_ts0202,
-                binary_sensor.motion_sensor_movimento
-            ]
+            changes to 'on'
+            entity_id binary_sensor.corredor_suite_luminance_motion_sensor_movimento
+                
+        ),
+        (
+            state
+            changes to 'on'
+            entity_id binary_sensor.tz3000_6ygjfyll_ts0202
+        ),
+        (
+            state
+            changes to 'on'
+            entity_id binary_sensor.motion_sensor_movimento
         )
     ]
     when [
@@ -28,7 +35,7 @@ create 'Corda Corredor - movimento':
 
         (
             entity_id light.corda_led_corredor
-            state is off
+            state is 'off'
         )
     ]
     do [

@@ -72,8 +72,54 @@ static void print_condition_item(FILE *out, Item *it, int indent) {
         if(before) print_indented(out, indent+2, "before: %s\n", before);
         return;
     }
+
+    /* detect explicit condition types that should take precedence */
+    int has_state = 0, has_sun = 0, has_trigger = 0;
+    for(Attr *p = a; p; p=p->next) {
+        if(strcmp(p->key, "state")==0) has_state = 1;
+        if(strcmp(p->key, "sun")==0) has_sun = 1;
+        if(strcmp(p->key, "trigger")==0) has_trigger = 1;
+    }
+
+    if(has_state) {
+        print_indented(out, indent, "- condition: state\n");
+        /* print entity_id first if present */
+        for(Attr *p = a; p; p=p->next) {
+            if(strcmp(p->key, "entity_id")==0) print_attr_value(out, indent+2, "entity_id", p->value);
+        }
+        /* then the state itself */
+        for(Attr *p = a; p; p=p->next) {
+            if(strcmp(p->key, "state")==0) print_attr_value(out, indent+2, "state", p->value);
+        }
+        /* any other attrs (like id, offset, etc) */
+        for(Attr *p = a; p; p=p->next) {
+            if(strcmp(p->key, "entity_id")==0) continue;
+            if(strcmp(p->key, "state")==0) continue;
+            print_attr_value(out, indent+2, p->key, p->value);
+        }
+        return;
+    }
+
+    if(has_sun) {
+        print_indented(out, indent, "- condition: sun\n");
+        for(Attr *p = a; p; p=p->next) {
+            if(strcmp(p->key, "sun")==0) continue;
+            print_attr_value(out, indent+2, p->key, p->value);
+        }
+        return;
+    }
+
+    if(has_trigger) {
+        print_indented(out, indent, "- condition: trigger\n");
+        for(Attr *p = a; p; p=p->next) {
+            if(strcmp(p->key, "trigger")==0) continue;
+            print_attr_value(out, indent+2, p->key, p->value);
+        }
+        return;
+    }
+
     /* device/state conditions */
-    /* if there is device_id or entity_id treat as device/state */
+    /* if there is device_id or entity_id treat as device */
     int has_device = 0, has_entity = 0;
     for(Attr *p = a; p; p=p->next) {
         if(strcmp(p->key, "device_id")==0) has_device=1;
@@ -84,7 +130,10 @@ static void print_condition_item(FILE *out, Item *it, int indent) {
         for(Attr *p = a; p; p=p->next) {
             if(strcmp(p->key, "device_id")==0) print_attr_value(out, indent+2, "device_id", p->value);
             else if(strcmp(p->key, "entity_id")==0) print_attr_value(out, indent+2, "entity_id", p->value);
-            else {
+            else if(strcmp(p->key, "type")==0 || strcmp(p->key, "domain")==0 || strcmp(p->key, "enabled")==0) {
+                /* print common named keys directly */
+                print_attr_value(out, indent+2, p->key, p->value);
+            } else {
                 /* domain/type like switch is_on -> key=switch value=is_on */
                 if(p->key && p->value) {
                     print_attr_value(out, indent+2, "type", p->value);
@@ -94,6 +143,7 @@ static void print_condition_item(FILE *out, Item *it, int indent) {
         }
         return;
     }
+
     /* fallback: print raw attrs */
     print_indented(out, indent, "- condition: \n");
     for(Attr *p = a; p; p=p->next) {
@@ -180,8 +230,18 @@ void emit_yaml(Automation *a, FILE *out) {
             if(!p) fprintf(out, "{}\n");
             else {
                 /* print first attr then others indented */
-                if(p->key && p->value) fprintf(out, "%s: %s\n", p->key, p->value);
-                else if(p->key) fprintf(out, "%s: \n", p->key);
+                if(p->key && p->value)
+                {
+                    fprintf(out, "trigger: %s\n", p->key);
+                    if(strcmp(p->key, "state") == 0)
+                    {
+                        print_attr_value(out, 4, "to", p->value);
+                    }
+                } 
+                else if(p->key) 
+                {
+                    fprintf(out, "trigger: %s\n", p->key);
+                }
                 p = p->next;
                 while(p) {
                     print_attr_value(out, 4, p->key, p->value);
