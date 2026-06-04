@@ -1,0 +1,63 @@
+create 'Sala - desligar luzes NSPanel':
+    id auto
+    description ''
+    mode single
+
+    listen [
+        (
+            device
+            device_id 8bab4f915657ed4ea1b1151603b2b9e9
+            entity_id b2b332adfb28616f2a8a705c922f6ead
+            switch turned_on
+        )
+    ]
+
+    when [
+        (
+            sun
+            before sunrise
+            after sunset
+        )
+    ]
+
+    do [
+        (
+            switch turn_off
+            entity_id [
+                switch.luzes_da_cozinha,
+                switch.luzes_da_sala,
+                switch.luzes_do_lavabo,
+                switch.cozinha_nichos_led_interruptor_1
+            ]
+            device_id [
+                499d4ee323725ca01a01affd2726cfc1,
+                5f9afdf1309a0b93f968874d8987f9ff,
+                b367687260d5c280782ca2662bc32784
+            ]
+        ),
+        (
+            alexa_devices send_text_command
+            device_id 38496a203273bbff294d6465d4042e55
+            text_command 'desligar tela'
+        ),
+        (
+            media_player turn_off
+            entity_id [
+                media_player.music_frame_2,
+                media_player.music_frame,
+                media_player.nestmini0550,
+                media_player.home_theater_2,
+                media_player.tx_nr5100
+            ]
+        )
+        ,(
+            alexa_devices send_text_command
+            device_id 38496a203273bbff294d6465d4042e55
+            text_command 'desligar tela'
+        ),
+        (
+            alexa_devices send_text_command
+            device_id 43ae6cf18c1b53649e81393dee7d7daa
+            text_command 'desligar tela'
+        )
+    ]

@@ -1,0 +1,55 @@
+create 'Sala - movimento noturno':
+    id auto
+    description ''
+    mode single
+
+    listen [
+        (
+            device
+            device_id 7316cbacc8493fa41d960855d7b84651
+            entity_id 9b6b660ce19b4b6c1d36e0534e94f51c
+            binary_sensor motion
+        ),
+        (
+            device
+            device_id 09e07aaa640d6b67e0102d3da11c85f6
+            entity_id 5e8d44a8bf2542a3a9c249de1dcaff20
+            binary_sensor motion
+        )
+    ]
+
+    when [
+        (
+            entity_id switch.luzes_da_cozinha
+            state is 'off'
+        ),
+        (
+            entity_id switch.luzes_da_sala
+            state is 'off'
+        ),
+        (
+            time after 01:00:00
+            time before 06:30:00
+        )
+    ]
+
+    do [
+        (
+            switch turn_on
+            target entity_id switch.ilha_interruptor_1
+        ),
+        (
+            notify mobile_app_zfold4
+            message 'Movimento noturno na sala '
+        ),
+        (
+            delay 00h04m00s00ms
+        ),
+        (
+            switch turn_off
+            entity_id [
+                switch.ilha_interruptor_1,
+                switch.sonoff_1001887e06_2
+            ]
+        )
+    ]

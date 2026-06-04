@@ -1,0 +1,59 @@
+create 'Closet - movimento':
+    id auto
+    description ''
+    mode restart
+
+    listen [
+        (
+            entity_id timer.closet
+            to idle
+            id Ocioso
+            trigger state
+        ),
+        (
+            entity_id timer.closet
+            to active
+            id Movimento
+            trigger state
+        ),
+        (
+            device
+            device_id 9a58a7513855478673b36aab01b68238
+            entity_id 1e1e192bce0cdc593a3e72dc6e996b46
+            binary_sensor motion
+            id Detectou
+        )
+    ]
+
+    when [
+        (
+            alarm_control_panel is disarmed
+        )
+    ]
+
+    do [
+        (
+            if (
+                trigger is Movimento or trigger is Detectou
+            )
+                timer start
+                entity_id timer.closet
+
+                if (
+                    switch is_off
+                    device_id 17577b83efd0951c4002cd6c7b91053c
+                    entity_id bb97c45f407329aca067d3f274499a81
+                )
+                    switch turn_on
+                    device_id b2f2ddf08a4b8e321fa259c76df42cef
+                    entity_id e6bd5f71286d23ea1c87b580aea4407c
+        ),
+        (
+            if (
+                trigger is Ocioso
+            )
+                switch turn_off
+                device_id b2f2ddf08a4b8e321fa259c76df42cef
+                entity_id e6bd5f71286d23ea1c87b580aea4407c
+        )
+    ]

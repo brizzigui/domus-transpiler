@@ -1,0 +1,62 @@
+create 'Corredor - chave hotel':
+    id auto
+    description ''
+    mode single
+
+    listen [
+        (
+            device
+            device_id d8e4c9d44f0588ccf8c0fe1a1e7afd7a
+            entity_id 73bd5ca47e3ec3a9bc6a463e0ae0dc98
+            switch turned_on
+            id 'Tuya on'
+        ),
+        (
+            device
+            device_id d8e4c9d44f0588ccf8c0fe1a1e7afd7a
+            entity_id 73bd5ca47e3ec3a9bc6a463e0ae0dc98
+            switch turned_off
+            id 'Tuya off'
+        ),
+        (
+            device
+            device_id 17577b83efd0951c4002cd6c7b91053c
+            entity_id dac219311283b7d5262d710d8f61b278
+            switch turned_on
+            id 'Sonoff on'
+        ),
+        (
+            device
+            device_id 17577b83efd0951c4002cd6c7b91053c
+            entity_id dac219311283b7d5262d710d8f61b278
+            switch turned_off
+            id 'Sonoff off'
+        )
+    ]
+
+    when [
+    ]
+
+    do [
+        (
+            if ( trigger is 'Tuya off' )
+                switch turn_off
+                device_id 17577b83efd0951c4002cd6c7b91053c
+                entity_id dac219311283b7d5262d710d8f61b278
+
+            else if ( trigger is 'Tuya on' )
+                switch turn_on
+                device_id 17577b83efd0951c4002cd6c7b91053c
+                entity_id dac219311283b7d5262d710d8f61b278
+
+            else if ( trigger is 'Sonoff off' )
+                switch turn_off
+                device_id d8e4c9d44f0588ccf8c0fe1a1e7afd7a
+                entity_id 73bd5ca47e3ec3a9bc6a463e0ae0dc98
+
+            else if ( trigger is 'Sonoff on' )
+                switch turn_on
+                device_id d8e4c9d44f0588ccf8c0fe1a1e7afd7a
+                entity_id 73bd5ca47e3ec3a9bc6a463e0ae0dc98
+        )
+    ]

@@ -1,0 +1,22 @@
+create 'Sala - desligar LED sanca':
+    id auto
+    description ''
+    mode single
+
+    listen [
+        (
+            trigger time
+            at 05:00:00
+        )
+    ]
+
+    when [
+    ]
+
+    do [
+        (
+            light turn_off
+            device_id ffd3af79d524466a845af9632fa93a8e
+            entity_id 973148b62067d63a345f9c1cd90436fb
+        )
+    ]

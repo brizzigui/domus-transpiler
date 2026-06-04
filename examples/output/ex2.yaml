@@ -5,15 +5,15 @@
   triggers:
   - trigger: sun
     event: sunset
-    offset: -01h30m00s
+    offset: -01:30:00
     id: chuva
   - trigger: sun
     event: sunset
-    offset: -01h15m00s
+    offset: -01:15:00
     id: nublado
   - trigger: sun
     event: sunset
-    offset: -00h45m00s
+    offset: -00:45:00
     id: sol
   conditions:
   - condition: state
@@ -24,7 +24,6 @@
       - condition: state
         entity_id: weather.forecast_casa
         state:
-          - any
           - rainy
           - pouring
           - lightning-rainy
@@ -39,7 +38,6 @@
           - condition: state
             entity_id: weather.forecast_casa
             state:
-              - any
               - cloudy
               - windy-variant
               - fog
@@ -57,6 +55,7 @@
           else:
             - if:
               - condition: trigger
+                id: sol
               then:
                 - action: automation.trigger
                   target.entity_id: automation.cozinha_ligar_luzes

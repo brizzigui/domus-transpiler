@@ -1,0 +1,60 @@
+create 'Corredor - movimento':
+    id auto
+    description ''
+    mode restart
+
+    listen [
+        (
+            entity_id timer.corredor
+            to idle
+            id Movimento_ocioso
+        ),
+        (
+            trigger state
+            entity_id binary_sensor.motion_sensor_movimento
+            to 'on'
+            id Movimento1
+        ),
+        (
+            trigger state
+            entity_id binary_sensor.corredor_suite_luminance_motion_sensor_movimento
+            to 'on'
+            id Movimento2
+        ),
+        (
+            trigger state
+            entity_id binary_sensor.tz3000_6ygjfyll_ts0202
+            to 'on'
+            id Movimento3
+        )
+    ]
+
+    when [
+        (
+            alarm_control_panel is disarmed
+        )
+    ]
+
+    do [
+        (
+            if ( trigger is Movimento2 or trigger is Movimento1 or trigger is Movimento3 )
+                timer start
+                entity_id timer.corredor
+
+                if ( state is 'off' and alarm_control_panel is disarmed )
+                    if ( time before '23:00:00' )
+                        switch turn_on
+                        entity_id switch.sonoff_10018dee48_1
+                    else
+                        switch turn_on
+                        entity_id switch.sonoff_100203a579_1
+        ),
+        (
+            if ( trigger is Movimento_ocioso )
+                switch turn_off
+                entity_id [
+                    switch.sonoff_10018dee48_1,
+                    switch.sonoff_100203a579_1
+                ]
+        )
+    ]

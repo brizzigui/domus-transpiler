@@ -1,0 +1,52 @@
+create 'Nicole - LED da TV':
+    id auto
+    description ''
+    mode single
+
+    listen [
+        (
+            device
+            device_id 275d68e2aa61f9229082505ddab26cd2
+            entity_id e26d13dc064b552d0c4c5b1401328d9a
+            switch turned_off
+            id Desativado
+        ),
+
+        (
+            device
+            device_id 275d68e2aa61f9229082505ddab26cd2
+            entity_id e26d13dc064b552d0c4c5b1401328d9a
+            switch turned_on
+            id Ativado
+        )
+    ]
+
+    when [
+        (
+            device_id 17577b83efd0951c4002cd6c7b91053c
+            entity_id bb97c45f407329aca067d3f274499a81
+            switch is_off
+            enabled false
+        ),
+        (
+            alarm_control_panel is disarmed
+        )
+    ]
+
+    do [
+        (
+            if (
+                trigger is Desativado
+            )
+                switch turn_off
+                device_id 01f2c119ba10ffd80fe535d4c03ec09e
+                entity_id d8598c0f4effd9848ca64cd9981f14f9
+
+            else if (
+                trigger is Ativado
+            )
+                switch turn_on
+                device_id 01f2c119ba10ffd80fe535d4c03ec09e
+                entity_id d8598c0f4effd9848ca64cd9981f14f9
+        )
+    ]

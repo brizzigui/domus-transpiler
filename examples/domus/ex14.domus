@@ -1,0 +1,72 @@
+create 'Nicole - movimento':
+    id auto
+    description ''
+    mode restart
+
+    listen [
+        (
+            entity_id timer.quarto_nicole
+            to idle
+            id Movimento_ocioso
+        ),
+        (
+            trigger state
+            entity_id binary_sensor.tze200_3towulqd_ts0601_ocupacao
+            to 'on'
+            id Movimento
+        ),
+        (
+            trigger state
+            entity_id binary_sensor.tze200_3towulqd_ts0601_ocupacao
+            to 'off'
+            id Liberado
+        )
+    ]
+
+    when [
+        (
+            alarm_control_panel is disarmed
+        )
+    ]
+
+    do [
+        (
+            if ( trigger is Movimento )
+                timer start
+                entity_id timer.quarto_nicole
+
+                if ( state is 'off' )
+                    switch turn_on
+                    entity_id switch.sonoff_10026c409b_1
+                    type turn_on
+                    device_id 5bd4ebd22dcd5e84cf3e8570dbcc12f7
+                    entity_id 7fdd514f2abd8ee085763019ba618a6a
+                    domain light
+
+        ),
+        (
+            if ( trigger is Movimento_ocioso )
+                switch turn_off
+                entity_id switch.sonoff_10026c409b_2
+                delay 00h01m00s00ms
+                switch turn_off
+                entity_id switch.sonoff_10026c409b_1
+                delay 00h01m00s00ms
+                media_player turn_off
+                device_id afab14d6c5d511f765acf8ab4d133ef0
+                switch turn_off
+                entity_id [
+                    switch.luzes_da_nicole,
+                    switch.espelho_banheiro_nicole_interruptor_1
+                ]
+                light turn_off
+                device_id 5bd4ebd22dcd5e84cf3e8570dbcc12f7
+                entity_id 7fdd514f2abd8ee085763019ba618a6a
+
+        ),
+        (
+            if ( trigger is Liberado )
+                timer start
+                entity_id timer.quarto_nicole
+        )
+    ]

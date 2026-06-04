@@ -1,0 +1,43 @@
+create 'Suíte - escova Oral-B':
+    id auto
+    description ''
+    mode single
+
+    listen [
+        (
+            trigger state
+            entity_id sensor.triumph_v2_90f2
+            to charging
+            id charging
+        ),
+        (
+            trigger state
+            entity_id sensor.triumph_v2_90f2
+            to idle
+            id idle
+        ),
+        (
+            trigger state
+            entity_id sensor.triumph_v2_90f2
+            to running
+            id running
+        )
+    ]
+
+    when [
+    ]
+
+    do [
+        (
+            if ( trigger is idle )
+                light turn_off
+                device_id 1bb0a2df63cc0b8cb75be4e7f5a21f8e
+                entity_id 1f44a726233f4ea71a519484b6d6e1da
+
+            else if ( trigger is running )
+                light turn_on
+                device_id 1bb0a2df63cc0b8cb75be4e7f5a21f8e
+                entity_id 1f44a726233f4ea71a519484b6d6e1da
+                brightness_pct 20
+        )
+    ]

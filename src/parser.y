@@ -6,6 +6,7 @@
 #include "yaml.h"
 
 extern int yylex(void);
+extern int yylineno;
 void yyerror(const char *s);
 
 /* global list of automations built by the parser */
@@ -34,8 +35,8 @@ Automation *cur_aut = NULL;
 
 %token <str> STRING IDENTIFIER NUMBER TIME_LITERAL DURATION_LITERAL
 %token CREATE ID DESCRIPTION MODE LISTEN WHEN DO IF ELSE AND OR NOT AFTER BEFORE IS
-%token STATEKW TIMEKW DEVICE_ID ENTITY_ID WITH CHANGES TO SUN EVENT OFFSET SKIP_CONDITION
-%token AUTOMATION TRIGGERKW DELAY
+%token STATEKW TIMEKW DEVICE_ID ENTITY_ID WITH CHANGES TO SUN DEVICE EVENT OFFSET SKIP_CONDITION
+%token AUTOMATION TRIGGERKW DELAY ABOVE BELOW ANY
 %token LBRACKET RBRACKET LPAREN RPAREN COLON COMMA MINUS PLUS
 
 %type <alist> attr_list attr
@@ -87,7 +88,8 @@ listen_item:
     ;
 
 condition_items:
-        condition_item { $$ = $1; }
+        /* empty */ { $$ = NULL; }
+    | condition_item { $$ = $1; }
     | condition_items COMMA condition_item { Item *p = $1; if(!p) $$ = $3; else { while(p->next) p = p->next; p->next = $3; $$ = $1; } }
     ;
 
@@ -127,6 +129,11 @@ attr:
         DEVICE_ID IDENTIFIER { $$ = ast_new_attr("device_id", $2); }
     | ENTITY_ID IDENTIFIER { $$ = ast_new_attr("entity_id", $2); }
     | STATEKW IS IDENTIFIER { $$ = ast_new_attr("state", $3); }
+    | STATEKW IS STRING {
+        char *quoted = malloc(strlen($3) + 3); /* ' + string + ' + \0 */
+        sprintf(quoted, "'%s'", $3);
+        $$ = ast_new_attr("state", quoted);
+    }
     | TIMEKW AFTER TIME_LITERAL { $$ = ast_new_attr("time_after", $3); }
     | TIMEKW BEFORE TIME_LITERAL { $$ = ast_new_attr("time_before", $3); }
     | STATEKW CHANGES TO IDENTIFIER { $$ = ast_new_attr("state", $4); }
@@ -136,29 +143,57 @@ attr:
         $$ = ast_new_attr("state", quoted);
     }
     | SUN { $$ = ast_new_attr("sun", NULL); }
+    | DEVICE { $$ = ast_new_attr("device", NULL); }
     | EVENT IDENTIFIER { $$ = ast_new_attr("event", $2); }
     | ID IDENTIFIER { $$ = ast_new_attr("id", $2); }
+    | ID STRING {
+        char *quoted = malloc(strlen($2) + 3); /* ' + string + ' + \0 */
+        sprintf(quoted, "'%s'", $2);
+        $$ = ast_new_attr("id", quoted);
+    }
     | TRIGGERKW IS IDENTIFIER { $$ = ast_new_attr("trigger", $3); }
+    | TRIGGERKW IS STRING {
+        char *quoted = malloc(strlen($3) + 3); /* ' + string + ' + \0 */
+        sprintf(quoted, "'%s'", $3);
+        $$ = ast_new_attr("trigger", quoted); 
+    }
     | IDENTIFIER IS IDENTIFIER { $$ = ast_new_attr($1, $3); }
     | IDENTIFIER IDENTIFIER { $$ = ast_new_attr($1, $2); }
+    | IDENTIFIER STRING {
+        char *quoted = malloc(strlen($2) + 3); /* ' + string + ' + \0 */
+        sprintf(quoted, "'%s'", $2);
+        $$ = ast_new_attr($1, quoted); 
+    }
     | IDENTIFIER LBRACKET id_list RBRACKET { $$ = ast_new_attr($1, $3); }
     | IDENTIFIER IS IDENTIFIER LBRACKET id_list RBRACKET { size_t n = strlen($3) + 1 + strlen($5) + 1; char *buf = malloc(n); strcpy(buf, $3); strcat(buf, ","); strcat(buf, $5); $$ = ast_new_attr($1, buf); free(buf); }
-    | STATEKW IS IDENTIFIER LBRACKET id_list RBRACKET { size_t n = strlen($3) + 1 + strlen($5) + 1; char *buf = malloc(n); strcpy(buf, $3); strcat(buf, ","); strcat(buf, $5); $$ = ast_new_attr("state", buf); free(buf); }
-    | STATEKW IS STRING LBRACKET id_list RBRACKET { size_t n = strlen($3) + strlen($5) + 4; char *buf = malloc(n); sprintf(buf, "'%s',%s", $3, $5); $$ = ast_new_attr("state", buf); free(buf);}
+    | STATEKW IS ANY LBRACKET id_list RBRACKET {$$ = ast_new_attr("state", $5);}
+    | TRIGGERKW IS ANY LBRACKET id_list RBRACKET {$$ = ast_new_attr("trigger", $5);}
     | OFFSET DURATION_LITERAL { $$ = ast_new_attr("offset", $2); }
     | SKIP_CONDITION IDENTIFIER { $$ = ast_new_attr("skip_condition", $2); }
     | CHANGES TO IDENTIFIER { $$ = ast_new_attr("changes_to", $3); }
     | WITH IDENTIFIER LBRACKET id_list RBRACKET { $$ = ast_new_attr($2, $4); }
+    | ABOVE NUMBER { $$ = ast_new_attr("above", $2); }
+    | BELOW NUMBER { $$ = ast_new_attr("below", $2); }
     ;
 
 id_list:
-        IDENTIFIER { $$ = strdup($1); }
+        STRING {
+        char *quoted = malloc(strlen($1) + 3); /* ' + string + ' + \0 */
+        sprintf(quoted, "'%s'", $1);
+        $$ = strdup(quoted); 
+    }
+    | IDENTIFIER { $$ = strdup($1); }
     | IDENTIFIER COMMA id_list { size_t n = strlen($1) + 1 + strlen($3) + 1; char *buf = malloc(n); strcpy(buf, $1); strcat(buf, ","); strcat(buf, $3); free($3); $$ = buf; }
+    | STRING COMMA id_list {
+        char *quoted = malloc(strlen($1) + 3); /* ' + string + ' + \0 */
+        sprintf(quoted, "'%s'", $1);
+        size_t n = strlen(quoted) + 1 + strlen($3) + 1; char *buf = malloc(n); strcpy(buf, quoted); strcat(buf, ","); strcat(buf, $3); free($3); $$ = buf;
+    }
     ;
 
 /* actions: each action is parenthesized */
 action_items:
-        action_item
+        action_item { $$ = $1; }
     | action_item COMMA action_items { Action *p = $1; if(!p) $$ = $3; else { while(p->next) p = p->next; p->next = $3; $$ = $1; } }
     ;
 
@@ -199,6 +234,7 @@ simple_action:
 
 void yyerror(const char *s) {
         fprintf(stderr, "Parse error: %s\n", s);
+        fprintf(stderr, "Line %d: %s\n", yylineno, s);
 }
 
 int main(int argc, char **argv) {

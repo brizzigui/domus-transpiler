@@ -1,0 +1,55 @@
+create 'Lavabo - 3o botão interruptor':
+    id auto
+    description ''
+    mode restart
+
+    listen [
+        (
+            device
+            device_id 9a51076c10d0adead01a5e23ba16e4dc
+            entity_id 8aa7f9cf78ad1d62f4df88ca2360df73
+            switch turned_on
+            id Liga
+        ),
+        (
+            device
+            device_id 9a51076c10d0adead01a5e23ba16e4dc
+            entity_id 8aa7f9cf78ad1d62f4df88ca2360df73
+            switch turned_off
+            id Desliga
+        )
+    ]
+
+    when [
+        (
+            alarm_control_panel is disarmed
+        )
+    ]
+
+    do [
+        (
+            if (
+                trigger is Liga
+            )
+                switch turn_on
+                entity_id [
+                    switch.espelho_do_lavabo,
+                    switch.sonoff_100200129d_2
+                ]
+
+            else if (
+                trigger is Desliga
+            )
+                switch turn_off
+                entity_id [
+                    switch.sonoff_100200129d_3,
+                    switch.sonoff_100200129d_2,
+                    switch.sonoff_100200129d_1,
+                    switch.espelho_do_lavabo
+                ]
+        ),
+        (
+            notify mobile_app_zfold4
+            message Lavabo
+        )
+    ]

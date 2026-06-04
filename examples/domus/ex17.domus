@@ -1,0 +1,101 @@
+create 'Sala - movimento':
+    id auto
+    description ''
+    mode restart
+
+    listen [
+        (
+            entity_id timer.sala
+            to idle
+            id Movimento_ocioso
+        ),
+        (
+            trigger state
+            entity_id binary_sensor.sala_motion_sensor
+            to 'on'
+            id Movimento
+        ),
+        (
+            trigger state
+            entity_id binary_sensor.cozinha_motion_sensor_movimento_2
+            to 'on'
+            id CozinhaMovimento
+        ),
+        (
+            trigger state
+            entity_id binary_sensor.sala_motion_sensor
+            to 'off'
+            id Liberado
+        ),
+        (
+            trigger state
+            entity_id binary_sensor.corredor_motion_sensor_pro_movimento
+            to 'on'
+            id 'Movimento Pro'
+        ),
+        (
+            trigger state
+            entity_id binary_sensor.corredor_motion_sensor_pro_movimento
+            to 'off'
+            id Liberado
+        ),
+        (
+            trigger state
+            entity_id light.luzes_da_sala
+            from 'on'
+            id 'Luzes ligada'
+        )
+    ]
+
+    when [
+        (
+            alarm_control_panel is disarmed
+        )
+    ]
+
+    do [
+        (
+            if ( trigger is Movimento or trigger is CozinhaMovimento or trigger is 'Movimento Pro' )
+                timer start
+                entity_id timer.sala
+                if ( state is 'on' and device 5e51e34745f04cf7f80d7a374d922d6f is_disarmed and switch.luzes_da_sala is 'off' )
+                    switch turn_on
+                    entity_id switch.sonoff_10021a5971_2
+                    delay 00h03m00s00ms
+                    switch turn_off
+                    entity_id switch.sonoff_10021a5971_2
+        ),
+        (
+            media_player volume_set
+            entity_id media_player.music_frame
+            volume_level 0.09
+        ),
+        (
+            if ( trigger is Movimento_ocioso )
+                media_player volume_set
+                entity_id media_player.music_frame_2
+                volume_level 0.11
+                switch turn_off
+                entity_id switch.sonoff_1002036351_1
+                media_player play_media
+                device_id 1024b1c11e9d6da1d9e3082300842673
+                delay 00h01m00s00ms
+                media_player play_media
+                device_id 1024b1c11e9d6da1d9e3082300842673
+                switch turn_off
+                entity_id switch.sonoff_1002036186_2
+                delay 00h01m00s00ms
+                media_player turn_off
+                entity_id media_player.music_frame_2
+                switch turn_off
+                entity_id switch.luzes_da_sala
+                alexa_devices send_text_command
+                device_id 38496a203273bbff294d6465d4042e55
+                text_command 'desligar tela'
+        ),
+        (
+            if ( trigger is Liberado )
+                timer start
+                entity_id timer.sala
+        )
+    ]

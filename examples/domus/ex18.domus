@@ -1,0 +1,46 @@
+create 'Sala - subwoofer':
+    id auto
+    description ''
+    mode single
+
+    listen [
+        (
+            trigger state
+            entity_id [
+                media_player.tx_nr5100,
+                media_player.onkyo_tx_nr5100_f563ca_2
+            ]
+            to 'off'
+            id 'Sub desligou'
+        ),
+        (
+            trigger state
+            entity_id [
+                media_player.onkyo_tx_nr5100_f563ca_2,
+                media_player.tx_nr5100
+            ]
+            to 'on'
+            id 'Sub ligou'
+        ),
+        (
+            trigger time
+            at 23:00:00
+            id Hora
+        )
+    ]
+
+    when [
+    ]
+
+    do [
+        (
+            if ( trigger is 'Sub desligou' or trigger is Hora )
+                switch turn_off
+                device_id 65521d4287a75a2c1bf685cb7af2a38b
+                entity_id 28acb048a251481979d3dfe7c9f3570f
+            else
+                switch turn_on
+                device_id 65521d4287a75a2c1bf685cb7af2a38b
+                entity_id 28acb048a251481979d3dfe7c9f3570f
+        )
+    ]

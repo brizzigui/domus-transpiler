@@ -1,0 +1,76 @@
+create 'Suite - movimento':
+    id auto
+    description ''
+    mode restart
+
+    listen [
+        (
+            entity_id timer.suite
+            to idle
+            id Ocioso
+        ),
+        (
+            entity_id timer.suite
+            to active
+            id Movimento
+        ),
+        (
+            device
+            device_id 902962bccd850d600c733825ce64149b
+            entity_id 40cb89919c68a62f97d1c5f343e36f30
+            binary_sensor turned_on
+            id 'Movimento cama'
+        ),
+        (
+            trigger state
+            entity_id binary_sensor.sonoff_a440036eb8
+            to 'on'
+            id Detector
+        )
+    ]
+
+    when [
+        (
+            alarm_control_panel is disarmed
+        )
+    ]
+
+    do [
+        (
+            if ( trigger is Movimento or trigger is 'Movimento cama' or trigger is Detector )
+                timer start
+                entity_id timer.suite
+
+                if (
+                    device 17577b83efd0951c4002cd6c7b91053c
+                    switch is_off
+                )
+                    light turn_on
+                    device_id 9920034bd1123c1923242b68c92e5d7d
+                    entity_id 73f3f45361dd6dd6828b4f132cfcaa4a
+        ),
+        (
+            if ( trigger is Ocioso )
+                switch turn_off
+                device_id b2f2ddf08a4b8e321fa259c76df42cef
+                entity_id e6bd5f71286d23ea1c87b580aea4407c
+                delay 00h00m30s00ms
+                light turn_off
+                entity_id [
+                    light.arandela_suite
+                ]
+                delay 00h00m30s00ms
+                light turn_off
+                entity_id [
+                    light.arandela_suite
+                ]
+                switch turn_off
+                device_id 6fd6b17870c0345ad8bf36fb086fca49
+                entity_id 726fc9c450c2044cc6bf5b4d8508436c
+                delay 00h00m30s00ms
+                switch turn_off
+                entity_id [
+                    switch.luzes_da_suite
+                ]
+        )
+    ]

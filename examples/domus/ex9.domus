@@ -1,0 +1,44 @@
+create 'Sala - NSPanel controla painel LED TV':
+    id auto
+    description ''
+    mode single
+
+    listen [
+        (
+            device
+            device_id 8bab4f915657ed4ea1b1151603b2b9e9
+            entity_id 2a3fe028eb0da3f11e73437fe3b34b5d
+            switch turned_on
+            id Ligado
+        ),
+        (
+            device
+            device_id 8bab4f915657ed4ea1b1151603b2b9e9
+            entity_id 2a3fe028eb0da3f11e73437fe3b34b5d
+            switch turned_off
+            id Desligado
+        )
+    ]
+
+    when [
+        (
+            device_id 5e51e34745f04cf7f80d7a374d922d6f
+            alarm_control_panel is_disarmed
+        )
+    ]
+
+    do [
+        (
+            if (
+                trigger is Ligado
+            )
+                switch turn_on
+                target entity_id switch.sonoff_1001e0dd5a_1
+
+            else if (
+                trigger is Desligado
+            )
+                switch turn_off
+                target entity_id switch.sonoff_1001e0dd5a_1
+        )
+    ]

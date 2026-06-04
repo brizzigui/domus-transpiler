@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <stdarg.h>
 #include "yaml.h"
 
@@ -42,6 +43,26 @@ static void print_attr_value(FILE *out, int indent, const char *key, const char 
     if(!val) {
         print_indented(out, indent, "%s: \n", key);
         return;
+    }
+    /* special-case: convert duration-style offsets (e.g. -01h15m00s) to colon format (-01:15:00) */
+    if(key && val && strcmp(key, "offset") == 0) {
+        const char *s = val;
+        char sign = 0;
+        if(*s == '+' || *s == '-') { sign = *s; s++; }
+        /* expect HHhMMmSSs... */
+        if(isdigit((unsigned char)s[0]) && isdigit((unsigned char)s[1]) && s[2]=='h'
+           && isdigit((unsigned char)s[3]) && isdigit((unsigned char)s[4]) && s[5]=='m'
+           && isdigit((unsigned char)s[6]) && isdigit((unsigned char)s[7]) && s[8]=='s') {
+            int h = (s[0]-'0')*10 + (s[1]-'0');
+            int m = (s[3]-'0')*10 + (s[4]-'0');
+            int sec = (s[6]-'0')*10 + (s[7]-'0');
+            if(sign)
+                print_indented(out, indent, "%s: %c%02d:%02d:%02d\n", key, sign, h, m, sec);
+            else
+                print_indented(out, indent, "%s: %02d:%02d:%02d\n", key, h, m, sec);
+            return;
+        }
+        /* fallthrough to default printing if pattern doesn't match */
     }
     /* if comma separated, print YAML list */
     if(strchr(val, ',')) {
@@ -111,10 +132,17 @@ static void print_condition_item(FILE *out, Item *it, int indent) {
 
     if(has_trigger) {
         print_indented(out, indent, "- condition: trigger\n");
+
         for(Attr *p = a; p; p=p->next) {
-            if(strcmp(p->key, "trigger")==0) continue;
+
+            if(strcmp(p->key, "trigger")==0) {
+                print_attr_value(out, indent+2, "id", p->value);
+                continue;
+            }
+
             print_attr_value(out, indent+2, p->key, p->value);
         }
+
         return;
     }
 

@@ -1,0 +1,83 @@
+create 'Eric -  movimento':
+    id auto
+    description ''
+    mode restart
+
+    listen [
+        (
+            entity_id timer.quarto_eric
+            to idle
+            id Movimento_ocioso
+        ),
+        (
+            trigger state
+            entity_id binary_sensor.eric_motion_sensor_movimento
+            to 'on'
+            id Movimento
+        ),
+        (
+            trigger state
+            entity_id binary_sensor.eric_motion_sensor_movimento
+            to 'off'
+            id Liberado
+        ),
+        (
+            trigger state
+            entity_id switch.luzes_do_eric
+            to 'on'
+            id Interruptores
+        )
+    ]
+
+    when [
+        (
+            alarm_control_panel is disarmed
+        )
+    ]
+
+    do [
+        (
+            if ( trigger is Movimento or trigger is Interruptores or trigger is Movimento2 )
+                timer start
+                entity_id timer.quarto_eric
+
+                if ( alarm_control_panel is disarmed and state is 'off' )
+                    switch turn_on
+                    target entity_id switch.sonoff_10018de98b_3
+                    type turn_on
+                    device_id 6ca8db2cd6cb58a49ec19e1a2de654a1
+                    entity_id 1e5dbdfba8fce27d9c0b427b3c109531
+                    domain light
+        ),
+        (
+                if ( trigger is Movimento_ocioso )
+                switch turn_off
+                entity_id switch.sonoff_10018de98b_1
+                
+                delay 00h01m00s00ms
+                switch turn_off
+                entity_id [
+                    switch.eric_nichos_interruptor_1,
+                    switch.sonoff_10018de98b_1
+                ]
+                delay 00h01m00s00ms
+                switch turn_off
+                entity_id [
+                    switch.luzes_do_eric,
+                    switch.eric_led_da_tv_tomada_1,
+                    switch.sonoff_10018de98b_3,
+                    switch.wifi_breaker_3_interruptor_1
+                ]
+                light turn_off
+                device_id be022c4355e8e71c2331ee1c0a485fd3
+                entity_id 627a27a968c5244807bdbcc477080e21
+                light turn_off
+                device_id 6ca8db2cd6cb58a49ec19e1a2de654a1
+                entity_id 1e5dbdfba8fce27d9c0b427b3c109531
+        ),
+        (
+            if ( trigger is Liberado or trigger is Liberado2 )
+                timer start
+                entity_id timer.quarto_eric
+        )
+    ]
