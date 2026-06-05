@@ -1,0 +1,21 @@
+- id: 'auto'
+  alias: Cozinha - desligar luzes
+  description: ''
+  mode: single
+  actions:
+    - type: turn_off
+      device_id: a596cab20ebb4bdb5d8ce1a5f176beca
+      entity_id: d51d48f52a856d2a87a080b71d23ff20
+      domain: light
+    - type: turn_off
+      device_id: 823dddc78874dd3987cd14188b78a5a3
+      entity_id: 07ee905d710ace9fac2d8121924bcd15
+      domain: light
+    - type: turn_off
+      device_id: 4b787a0be0d44cb91d15949617798e17
+      entity_id: 976f5231d4889cf3165bc14dc157bbef
+      domain: switch
+    - type: toggle
+      device_id: 44759ed71b0f6a82bcc65d2e33efa4a6
+      entity_id: e042f1604e0dc36207b629524f5b3633
+      domain: light

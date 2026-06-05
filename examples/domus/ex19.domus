@@ -5,7 +5,7 @@ create 'Sala - desligar LED sanca':
 
     listen [
         (
-            trigger time
+            time
             at 05:00:00
         )
     ]

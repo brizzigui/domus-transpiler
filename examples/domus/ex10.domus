@@ -36,7 +36,7 @@ create 'Sala - movimento noturno':
     do [
         (
             switch turn_on
-            target entity_id switch.ilha_interruptor_1
+            entity_id switch.ilha_interruptor_1
         ),
         (
             notify mobile_app_zfold4

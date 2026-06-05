@@ -5,13 +5,13 @@ create 'Suíte - cortinas':
 
     listen [
         (
-            trigger time
-            at '22:30:00'
+            time
+            at 22:30:00
             id 'Abrir blackout'
         ),
         (
-            trigger time
-            at '12:30:00'
+            time
+            at 12:30:00
             id 'Abrir cortina'
         )
     ]

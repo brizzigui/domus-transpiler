@@ -5,16 +5,16 @@ create 'Closet - movimento':
 
     listen [
         (
+            state
+            changes to idle
             entity_id timer.closet
-            to idle
             id Ocioso
-            trigger state
         ),
         (
+            state
+            changes to active
             entity_id timer.closet
-            to active
             id Movimento
-            trigger state
         ),
         (
             device
@@ -34,7 +34,10 @@ create 'Closet - movimento':
     do [
         (
             if (
-                trigger is Movimento or trigger is Detectou
+                trigger is any [
+                    Movimento,
+                    Detectou
+                ]
             )
                 timer start
                 entity_id timer.closet

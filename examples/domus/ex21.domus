@@ -5,9 +5,9 @@ create 'Aviso Sonoro - Interruptor Ligado':
 
     listen [
         (
+            state
+            changes to 'on'
             entity_id light.sonoff_1002036186
-            to 'on'
-            trigger state
         )
     ]
 
@@ -17,8 +17,8 @@ create 'Aviso Sonoro - Interruptor Ligado':
     do [
         (
             tts speak
-            target entity_id tts.google_ai_tts
-            data cache true
+            entity_id tts.google_ai_tts
+            data.cache true
             media_player_entity_id media_player.cozinha_4
             message 'oi oi oi oi oi '
         ),

@@ -5,20 +5,21 @@ create 'Nicole - movimento':
 
     listen [
         (
+            state
+            changes to idle
             entity_id timer.quarto_nicole
-            to idle
             id Movimento_ocioso
         ),
         (
-            trigger state
+            state
+            changes to 'on'
             entity_id binary_sensor.tze200_3towulqd_ts0601_ocupacao
-            to 'on'
             id Movimento
         ),
         (
-            trigger state
+            state
+            changes to 'off'
             entity_id binary_sensor.tze200_3towulqd_ts0601_ocupacao
-            to 'off'
             id Liberado
         )
     ]

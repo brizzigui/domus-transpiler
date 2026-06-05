@@ -1,0 +1,23 @@
+- id: 'auto'
+  alias: Aviso Sonoro - Interruptor Ligado
+  description: 'Avisa no Google Home quando o interruptor for ligado'
+  mode: single
+  triggers:
+  - trigger: state
+    to: 'on'
+    entity_id: light.sonoff_1002036186
+  actions:
+    - type: speak
+      entity_id: tts.google_ai_tts
+      data.cache: true
+      media_player_entity_id: media_player.cozinha_4
+      message: 'oi oi oi oi oi '
+      domain: tts
+    - type: send_sound
+      device_id: 3926ef6f709821d794008bb86c52ecd4
+      sound: amzn_sfx_doorbell_chime_01
+      domain: alexa_devices
+    - type: send_text_command
+      device_id: 38496a203273bbff294d6465d4042e55
+      text_command: 'desligar tela'
+      domain: alexa_devices

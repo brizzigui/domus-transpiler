@@ -33,12 +33,12 @@ create 'Sala - NSPanel controla painel LED TV':
                 trigger is Ligado
             )
                 switch turn_on
-                target entity_id switch.sonoff_1001e0dd5a_1
+                entity_id switch.sonoff_1001e0dd5a_1
 
             else if (
                 trigger is Desligado
             )
                 switch turn_off
-                target entity_id switch.sonoff_1001e0dd5a_1
+                entity_id switch.sonoff_1001e0dd5a_1
         )
     ]

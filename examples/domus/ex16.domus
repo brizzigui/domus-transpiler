@@ -5,26 +5,28 @@ create 'Corredor - movimento':
 
     listen [
         (
+            state
+            changes to idle
             entity_id timer.corredor
-            to idle
             id Movimento_ocioso
+            alias 'Movimento Ocioso'
         ),
         (
-            trigger state
+            state
+            changes to 'on'
             entity_id binary_sensor.motion_sensor_movimento
-            to 'on'
             id Movimento1
         ),
         (
-            trigger state
+            state
+            changes to 'on'
             entity_id binary_sensor.corredor_suite_luminance_motion_sensor_movimento
-            to 'on'
             id Movimento2
         ),
         (
-            trigger state
+            state
+            changes to 'on'
             entity_id binary_sensor.tz3000_6ygjfyll_ts0202
-            to 'on'
             id Movimento3
         )
     ]
@@ -42,7 +44,7 @@ create 'Corredor - movimento':
                 entity_id timer.corredor
 
                 if ( state is 'off' and alarm_control_panel is disarmed )
-                    if ( time before '23:00:00' )
+                    if ( time before 23:00:00 )
                         switch turn_on
                         entity_id switch.sonoff_10018dee48_1
                     else

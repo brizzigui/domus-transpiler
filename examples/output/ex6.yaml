@@ -1,0 +1,50 @@
+- id: 'auto'
+  alias: Closet - movimento
+  description: ''
+  mode: restart
+  triggers:
+  - trigger: state
+    to: idle
+    entity_id: timer.closet
+    id: Ocioso
+  - trigger: state
+    to: active
+    entity_id: timer.closet
+    id: Movimento
+  - trigger: device
+    device_id: 9a58a7513855478673b36aab01b68238
+    entity_id: 1e1e192bce0cdc593a3e72dc6e996b46
+    binary_sensor: motion
+    id: Detectou
+  conditions:
+  - condition: 
+    alarm_control_panel: disarmed
+  actions:
+    - if:
+      - condition: trigger
+        id:
+          - Movimento
+          - Detectou
+      then:
+        - type: start
+          entity_id: timer.closet
+          domain: timer
+        - if:
+          - condition: device
+            type: is_off
+            domain: switch
+            device_id: 17577b83efd0951c4002cd6c7b91053c
+            entity_id: bb97c45f407329aca067d3f274499a81
+          then:
+            - type: turn_on
+              device_id: b2f2ddf08a4b8e321fa259c76df42cef
+              entity_id: e6bd5f71286d23ea1c87b580aea4407c
+              domain: switch
+    - if:
+      - condition: trigger
+        id: Ocioso
+      then:
+        - type: turn_off
+          device_id: b2f2ddf08a4b8e321fa259c76df42cef
+          entity_id: e6bd5f71286d23ea1c87b580aea4407c
+          domain: switch

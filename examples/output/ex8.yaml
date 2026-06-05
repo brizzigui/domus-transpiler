@@ -1,0 +1,61 @@
+- id: 'auto'
+  alias: Suite - botão Dani
+  description: ''
+  mode: single
+  triggers:
+  - trigger: state
+    to: single
+    entity_id: sensor.sonoff_a440016554
+    id: Single
+  - trigger: state
+    to: 'double '
+    entity_id: sensor.sonoff_a440016554
+    id: 'Double '
+  - trigger: state
+    to: hold
+    entity_id: sensor.sonoff_a440016554
+    id: Hold
+  actions:
+    - if:
+      - condition: trigger
+        id: Single
+      then:
+        - if:
+          - condition: state
+            state: 'off'
+          then:
+            - type: turn_on
+              entity_id: light.arandela_suite
+              domain: light
+          else:
+            - if:
+              - condition: state
+                state: 'on'
+              then:
+                - type: turn_off
+                  entity_id:
+                    - switch.luzes_da_nicole
+                    - switch.luzes_do_eric
+                    - switch.sonoff_10018dee48_1
+                    - switch.luzes_da_suite
+                  device_id: df57e4531b088a9e6a4f332bfd0f66f3
+                  switch: turn_on
+                  device_id: 17577b83efd0951c4002cd6c7b91053c
+                  entity_id: bb97c45f407329aca067d3f274499a81
+                  timer: finish
+                  entity_id:
+                    - timer.quarto_eric
+                    - timer.corredor
+                    - timer.quarto_nicole
+                    - timer.closet
+                    - timer.banho_nicole
+                  light: turn_off
+                  entity_id: light.fita_led_rgb_5m
+                  domain: switch
+    - if:
+      - condition: trigger
+        id: 'Double '
+      then:
+        - type: turn_off
+          entity_id: switch.luzes_da_suite
+          domain: switch

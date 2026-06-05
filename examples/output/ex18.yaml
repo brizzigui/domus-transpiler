@@ -1,0 +1,46 @@
+- id: 'auto'
+  alias: Sala - subwoofer
+  description: ''
+  mode: single
+  triggers:
+  - trigger: state
+    to: 'off'
+    entity_id:
+      - media_player.tx_nr5100
+      - media_player.onkyo_tx_nr5100_f563ca_2
+    id: 'Sub desligou'
+  - trigger: state
+    to: 'on'
+    entity_id:
+      - media_player.onkyo_tx_nr5100_f563ca_2
+      - media_player.tx_nr5100
+    id: 'Sub ligou'
+  - trigger: state
+    to: standby
+    entity_id:
+      - media_player.onkyo_tx_nr5100_f563ca_2
+      - media_player.tx_nr5100
+    id: 'Sub ligou'
+  - trigger: state
+    to: playing
+    entity_id:
+      - media_player.onkyo_tx_nr5100_f563ca_2
+      - media_player.tx_nr5100
+    id: 'Sub ligou'
+  - trigger: time_before
+    id: Hora
+  actions:
+    - if:
+      - condition: trigger
+        id: 'Sub desligou'
+        id: Hora
+      then:
+        - type: turn_off
+          device_id: 65521d4287a75a2c1bf685cb7af2a38b
+          entity_id: 28acb048a251481979d3dfe7c9f3570f
+          domain: switch
+      else:
+        - type: turn_on
+          device_id: 65521d4287a75a2c1bf685cb7af2a38b
+          entity_id: 28acb048a251481979d3dfe7c9f3570f
+          domain: switch

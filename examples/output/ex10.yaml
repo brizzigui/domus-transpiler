@@ -1,0 +1,40 @@
+- id: 'auto'
+  alias: Sala - movimento noturno
+  description: ''
+  mode: single
+  triggers:
+  - trigger: device
+    device_id: 7316cbacc8493fa41d960855d7b84651
+    entity_id: 9b6b660ce19b4b6c1d36e0534e94f51c
+    binary_sensor: motion
+  - trigger: device
+    device_id: 09e07aaa640d6b67e0102d3da11c85f6
+    entity_id: 5e8d44a8bf2542a3a9c249de1dcaff20
+    binary_sensor: motion
+  conditions:
+  - condition: state
+    entity_id: switch.luzes_da_cozinha
+    state: 'off'
+  - condition: state
+    entity_id: switch.luzes_da_sala
+    state: 'off'
+  - condition: time
+    after: 01:00:00
+    before: 06:30:00
+  actions:
+    - type: turn_on
+      entity_id: switch.ilha_interruptor_1
+      domain: switch
+    - type: mobile_app_zfold4
+      message: 'Movimento noturno na sala '
+      domain: notify
+    - delay:
+      hours: 0
+      minutes: 4
+      seconds: 0
+      milliseconds: 0
+    - type: turn_off
+      entity_id:
+        - switch.ilha_interruptor_1
+        - switch.sonoff_1001887e06_2
+      domain: switch

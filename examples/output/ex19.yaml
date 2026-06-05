@@ -1,0 +1,11 @@
+- id: 'auto'
+  alias: Sala - desligar LED sanca
+  description: ''
+  mode: single
+  triggers:
+  - trigger: time_before
+  actions:
+    - type: turn_off
+      device_id: ffd3af79d524466a845af9632fa93a8e
+      entity_id: 973148b62067d63a345f9c1cd90436fb
+      domain: light

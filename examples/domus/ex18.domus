@@ -5,25 +5,43 @@ create 'Sala - subwoofer':
 
     listen [
         (
-            trigger state
+            state
+            changes to 'off'
             entity_id [
                 media_player.tx_nr5100,
                 media_player.onkyo_tx_nr5100_f563ca_2
             ]
-            to 'off'
             id 'Sub desligou'
         ),
         (
-            trigger state
+            state
+            changes to 'on'
             entity_id [
                 media_player.onkyo_tx_nr5100_f563ca_2,
                 media_player.tx_nr5100
             ]
-            to 'on'
             id 'Sub ligou'
         ),
         (
-            trigger time
+            state
+            changes to standby
+            entity_id [
+                media_player.onkyo_tx_nr5100_f563ca_2,
+                media_player.tx_nr5100
+            ]
+            id 'Sub ligou'
+        ),
+        (
+            state
+            changes to playing
+            entity_id [
+                media_player.onkyo_tx_nr5100_f563ca_2,
+                media_player.tx_nr5100
+            ]
+            id 'Sub ligou'
+        ),
+        (
+            time
             at 23:00:00
             id Hora
         )

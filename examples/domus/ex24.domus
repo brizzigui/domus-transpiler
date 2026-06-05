@@ -5,21 +5,21 @@ create 'Suíte - escova Oral-B':
 
     listen [
         (
-            trigger state
+            state
+            changes to charging
             entity_id sensor.triumph_v2_90f2
-            to charging
             id charging
         ),
         (
-            trigger state
+            state
+            changes to idle
             entity_id sensor.triumph_v2_90f2
-            to idle
             id idle
         ),
         (
-            trigger state
+            state
+            changes to running
             entity_id sensor.triumph_v2_90f2
-            to running
             id running
         )
     ]

@@ -48,6 +48,8 @@ ATOM        ([A-Za-z_][A-Za-z0-9_.-]*)|([0-9][A-Za-z0-9_.-]+)
 
 "after"                    return AFTER;
 "before"                   return BEFORE;
+"at"                       return AT;
+"for"                      return FOR;
 
 "any"                      return ANY;
 "below"                    return BELOW;
@@ -62,8 +64,7 @@ ATOM        ([A-Za-z_][A-Za-z0-9_.-]*)|([0-9][A-Za-z0-9_.-]+)
 "with"                     return WITH;
 "changes"                  return CHANGES;
 "to"                       return TO;
-"sun"                      return SUN;
-"device"                   return DEVICE;
+"from"                     return FROM;
 "event"                    return EVENT;
 "offset"                   return OFFSET;
 "skip_condition"           return SKIP_CONDITION;

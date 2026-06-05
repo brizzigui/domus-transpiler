@@ -5,27 +5,40 @@ create 'Eric -  movimento':
 
     listen [
         (
+            state
+            changes to idle
             entity_id timer.quarto_eric
-            to idle
             id Movimento_ocioso
         ),
         (
-            trigger state
+            state
+            changes to 'on'
             entity_id binary_sensor.eric_motion_sensor_movimento
-            to 'on'
             id Movimento
         ),
         (
-            trigger state
+            state
+            changes to 'off'
             entity_id binary_sensor.eric_motion_sensor_movimento
-            to 'off'
             id Liberado
         ),
         (
-            trigger state
+            state
+            changes to 'on'
             entity_id switch.luzes_do_eric
-            to 'on'
             id Interruptores
+        ),
+        (
+            state
+            changes to 'on'
+            entity_id binary_sensor.eric_motion_sensor_quarto
+            id Movimento2
+        ),
+        (
+            state
+            changes to 'on'
+            entity_id binary_sensor.eric_motion_sensor_quarto
+            id Liberado2
         )
     ]
 
@@ -37,11 +50,15 @@ create 'Eric -  movimento':
 
     do [
         (
-            if ( trigger is Movimento or trigger is Interruptores or trigger is Movimento2 )
+            if ( trigger is any [
+                Movimento,
+                Interruptores,
+                Movimento2  
+            ])
                 timer start
                 entity_id timer.quarto_eric
 
-                if ( alarm_control_panel is disarmed and state is 'off' )
+                if ( alarm_control_panel is disarmed and switch.sonoff_10018dee48_3 is off )
                     switch turn_on
                     target entity_id switch.sonoff_10018de98b_3
                     type turn_on
