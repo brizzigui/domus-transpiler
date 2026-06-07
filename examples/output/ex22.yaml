@@ -1,7 +1,9 @@
-- id: '1780870264471'
+- id: '1780870759735'
   alias: Cozinha - desligar luzes
   description: ''
   mode: single
+  triggers: []
+  conditions: []
   actions:
     - type: turn_off
       device_id: a596cab20ebb4bdb5d8ce1a5f176beca

@@ -1,4 +1,4 @@
-- id: '1780870264468'
+- id: '1780870759731'
   alias: Sala - porta de entrada
   description: ''
   mode: single
@@ -25,6 +25,7 @@
     type: not_opened
     domain: binary_sensor
     id: Fechada
+  conditions: []
   actions:
     - if:
       - condition: trigger

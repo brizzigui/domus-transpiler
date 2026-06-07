@@ -1,4 +1,4 @@
-- id: '1780870264453'
+- id: '1780870759693'
   alias: Corredor - chave hotel
   description: ''
   mode: single
@@ -27,6 +27,7 @@
     type: turned_off
     domain: switch
     id: 'Sonoff off'
+  conditions: []
   actions:
     - if:
       - condition: trigger

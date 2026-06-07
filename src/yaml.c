@@ -532,12 +532,16 @@ void emit_yaml(Automation *a, FILE *out) {
                 }
             }
         }
+    } else {
+        fprintf(out, "  triggers: []\n");
     }
     if(a->conditions) {
         fprintf(out, "  conditions:\n");
         for(Item *it = a->conditions; it; it = it->next) {
             print_condition_item(out, it, 2);
         }
+    } else {
+        fprintf(out, "  conditions: []\n");
     }
     if(a->actions) {
         fprintf(out, "  actions:\n");

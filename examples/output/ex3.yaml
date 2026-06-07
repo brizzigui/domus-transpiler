@@ -1,4 +1,4 @@
-- id: '1780870264476'
+- id: '1780870759739'
   alias: Tablet - carregador
   description: ''
   mode: single
@@ -31,6 +31,7 @@
     domain: sensor
     id: '- de 5'
     below: 5
+  conditions: []
   actions:
     - if:
       - condition: trigger

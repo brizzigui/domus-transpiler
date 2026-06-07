@@ -1,4 +1,4 @@
-- id: '1780870264470'
+- id: '1780870759733'
   alias: Aviso Sonoro - Interruptor Ligado
   description: 'Avisa no Google Home quando o interruptor for ligado'
   mode: single
@@ -6,6 +6,7 @@
   - trigger: state
     to: 'on'
     entity_id: light.sonoff_1002036186
+  conditions: []
   actions:
     - action: tts.speak
       target:

@@ -1,4 +1,4 @@
-- id: '1780870264464'
+- id: '1780870759724'
   alias: Sala - subwoofer
   description: ''
   mode: single
@@ -30,6 +30,7 @@
   - trigger: time
     at: 23:00:00
     id: Hora
+  conditions: []
   actions:
     - if:
       - condition: trigger
