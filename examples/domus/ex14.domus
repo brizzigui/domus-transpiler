@@ -26,7 +26,8 @@ create 'Nicole - movimento':
 
     when [
         (
-            alarm_control_panel is disarmed
+            entity_id alarm_control_panel.alarmo
+            state is disarmed
         )
     ]
 
@@ -36,7 +37,12 @@ create 'Nicole - movimento':
                 timer start
                 entity_id timer.quarto_nicole
 
-                if ( state is 'off' )
+                if [
+                    (
+                        entity_id switch.sonoff_10018dee48_3
+                        state is 'off'
+                    )
+                ]
                     switch turn_on
                     entity_id switch.sonoff_10026c409b_1
                     type turn_on

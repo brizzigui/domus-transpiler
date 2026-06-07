@@ -32,14 +32,16 @@
     entity_id: light.luzes_da_sala
     id: 'Luzes ligada'
   conditions:
-  - condition: 
-    alarm_control_panel: disarmed
+  - condition: state
+    entity_id: alarm_control_panel.alarmo
+    state: disarmed
   actions:
     - if:
       - condition: trigger
-        id: Movimento
-        id: CozinhaMovimento
-        id: 'Movimento Pro'
+        id:
+          - Movimento
+          - CozinhaMovimento
+          - 'Movimento Pro'
       then:
         - type: start
           entity_id: timer.sala
@@ -85,9 +87,11 @@
         - type: volume_set
           entity_id: media_player.music_frame_2
           volume_level: 0.11
-          switch: turn_off
+          domain: media_player
+        - type: turn_off
           entity_id: switch.sonoff_1002036351_1
-          media_player: play_media
+          domain: switch
+        - type: play_media
           device_id: 1024b1c11e9d6da1d9e3082300842673
           domain: media_player
         - delay:
@@ -97,9 +101,10 @@
           milliseconds: 0
         - type: play_media
           device_id: 1024b1c11e9d6da1d9e3082300842673
-          switch: turn_off
-          entity_id: switch.sonoff_1002036186_2
           domain: media_player
+        - type: turn_off
+          entity_id: switch.sonoff_1002036186_2
+          domain: switch
         - delay:
           hours: 0
           minutes: 1
@@ -107,12 +112,14 @@
           milliseconds: 0
         - type: turn_off
           entity_id: media_player.music_frame_2
-          switch: turn_off
-          entity_id: switch.luzes_da_sala
-          alexa_devices: send_text_command
-          device_id: 38496a203273bbff294d6465d4042e55
-          text_command: 'desligar tela'
           domain: media_player
+        - type: turn_off
+          entity_id: switch.luzes_da_sala
+          domain: switch
+        - action: alexa_devices.send_text_command
+          data:
+            device_id: 38496a203273bbff294d6465d4042e55
+            text_command: 'desligar tela'
     - if:
       - condition: trigger
         id: Liberado

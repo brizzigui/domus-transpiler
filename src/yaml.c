@@ -39,6 +39,54 @@ static void print_indented(FILE *out, int indent, const char *fmt, ...) {
     va_end(ap);
 }
 
+/* Check if a string is a known HA domain that starts a new action */
+static int is_ha_domain(const char *s) {
+    if(!s) return 0;
+    static const char *domains[] = {
+        "switch", "light", "timer", "notify", "media_player",
+        "cover", "alexa_devices", "tts", "input_boolean",
+        "input_number", "input_select", "input_text",
+        "scene", "script", "fan", "climate", "lock",
+        "vacuum", "camera", "alarm_control_panel",
+        NULL
+    };
+    for(int i=0; domains[i]; i++) {
+        if(strcmp(s, domains[i])==0) return 1;
+    }
+    return 0;
+}
+
+/* Check if a string is a known HA domain used in device triggers */
+static int is_trigger_domain(const char *s) {
+    if(!s) return 0;
+    static const char *domains[] = {
+        "switch", "light", "binary_sensor", "sensor", "cover",
+        "alarm_control_panel", "media_player", "fan", "lock",
+        "climate", "vacuum", "camera",
+        NULL
+    };
+    for(int i=0; domains[i]; i++) {
+        if(strcmp(s, domains[i])==0) return 1;
+    }
+    return 0;
+}
+
+/* Parse a domus duration string like 00h01m00s into h/m/s components */
+static int parse_duration(const char *val, int *h, int *m, int *s) {
+    if(!val) return 0;
+    const char *p = val;
+    *h = 0; *m = 0; *s = 0;
+    if(isdigit((unsigned char)p[0]) && isdigit((unsigned char)p[1]) && p[2]=='h'
+       && isdigit((unsigned char)p[3]) && isdigit((unsigned char)p[4]) && p[5]=='m'
+       && isdigit((unsigned char)p[6]) && isdigit((unsigned char)p[7]) && p[8]=='s') {
+        *h = (p[0]-'0')*10 + (p[1]-'0');
+        *m = (p[3]-'0')*10 + (p[4]-'0');
+        *s = (p[6]-'0')*10 + (p[7]-'0');
+        return 1;
+    }
+    return 0;
+}
+
 static void print_attr_value(FILE *out, int indent, const char *key, const char *val) {
     if(!val) {
         print_indented(out, indent, "%s: \n", key);
@@ -83,14 +131,24 @@ static void print_condition_item(FILE *out, Item *it, int indent) {
     Attr *a = it->attrs;
     int has_time_after = 0, has_time_before = 0;
     const char *after = NULL, *before = NULL;
+    /* also detect weekday */
+    int has_weekday = 0;
+    const char *weekday_val = NULL;
     for(Attr *p = a; p; p=p->next) {
         if(strcmp(p->key, "time_after")==0) { has_time_after=1; after=p->value; }
         if(strcmp(p->key, "time_before")==0) { has_time_before=1; before=p->value; }
+        if(strcmp(p->key, "weekday")==0) { has_weekday=1; weekday_val=p->value; }
     }
     if(has_time_after || has_time_before) {
         print_indented(out, indent, "- condition: time\n");
         if(after) print_indented(out, indent+2, "after: %s\n", after);
         if(before) print_indented(out, indent+2, "before: %s\n", before);
+        return;
+    }
+
+    if(has_weekday) {
+        print_indented(out, indent, "- condition: time\n");
+        print_attr_value(out, indent+2, "weekday", weekday_val);
         return;
     }
 
@@ -132,14 +190,33 @@ static void print_condition_item(FILE *out, Item *it, int indent) {
 
     if(has_trigger) {
         print_indented(out, indent, "- condition: trigger\n");
-
+        /* Bug 2 fix: collect all trigger values and emit as a proper list */
+        int trigger_count = 0;
         for(Attr *p = a; p; p=p->next) {
+            if(strcmp(p->key, "trigger")==0) trigger_count++;
+        }
 
-            if(strcmp(p->key, "trigger")==0) {
-                print_attr_value(out, indent+2, "id", p->value);
-                continue;
+        if(trigger_count > 1) {
+            /* multiple triggers: emit as a YAML list */
+            print_indented(out, indent+2, "id:\n");
+            for(Attr *p = a; p; p=p->next) {
+                if(strcmp(p->key, "trigger")==0) {
+                    print_indented(out, indent+4, "- %s\n", p->value ? p->value : "");
+                }
             }
+        } else {
+            /* single trigger: check if it has commas (already a CSV list from 'trigger is any [...]') */
+            for(Attr *p = a; p; p=p->next) {
+                if(strcmp(p->key, "trigger")==0) {
+                    print_attr_value(out, indent+2, "id", p->value);
+                    break;
+                }
+            }
+        }
 
+        /* print non-trigger attrs */
+        for(Attr *p = a; p; p=p->next) {
+            if(strcmp(p->key, "trigger")==0) continue;
             print_attr_value(out, indent+2, p->key, p->value);
         }
 
@@ -172,28 +249,174 @@ static void print_condition_item(FILE *out, Item *it, int indent) {
         return;
     }
 
-    /* fallback: print raw attrs */
-    print_indented(out, indent, "- condition: \n");
+    /* Bug 4 fix: fallback - emit as condition: state instead of empty condition: */
+    print_indented(out, indent, "- condition: state\n");
     for(Attr *p = a; p; p=p->next) {
-        print_attr_value(out, indent+2, p->key, p->value);
+        /* For bare domain conditions like "alarm_control_panel disarmed",
+           emit as entity_id: <domain>.alarmo  state: <value> */
+        if(p->key && p->value && is_ha_domain(p->key)) {
+            /* This is a domain-based state check */
+            print_attr_value(out, indent+2, "state", p->value);
+        } else {
+            print_attr_value(out, indent+2, p->key, p->value);
+        }
     }
 }
 
 static void print_actions(FILE *out, Action *act, int indent);
 
+/*
+ * Bug 1/5 fix: split a single ACT_SIMPLE action into multiple actions
+ * when the attrs contain HA domain names that indicate a new action starts.
+ *
+ * The parser greedily consumes everything into one action, e.g.:
+ *   switch turn_off entity_id X notify mobile_app message Y light turn_off entity_id Z
+ * becomes one action with cmd=switch, subcmd=turn_off, and all subsequent
+ * domain/subcmd pairs merged as attrs.
+ *
+ * We detect this by finding attrs where key is a HA domain name and value
+ * looks like a command (or is NULL with next attr being a command).
+ */
 static void print_action_simple(FILE *out, Action *a, int indent) {
-    if(a->subcmd) {
-        print_indented(out, indent, "- type: %s\n", a->subcmd);
-    } else {
-        print_indented(out, indent, "- action: %s\n", a->cmd ? a->cmd : "");
+    /* Build a list of action segments by scanning attrs for domain boundaries */
+    /* First action uses a->cmd and a->subcmd */
+
+    /* Collect attrs into an array for easier indexing */
+    int attr_count = 0;
+    for(Attr *p = a->attrs; p; p=p->next) attr_count++;
+
+    Attr **attr_arr = NULL;
+    if(attr_count > 0) {
+        attr_arr = calloc(attr_count, sizeof(Attr*));
+        int i = 0;
+        for(Attr *p = a->attrs; p; p=p->next) attr_arr[i++] = p;
     }
-    /* print attrs */
-    for(Attr *p = a->attrs; p; p=p->next) {
-        if(strcmp(p->key, "entity_id")==0) print_attr_value(out, indent+2, "entity_id", p->value);
-        else if(strcmp(p->key, "device_id")==0) print_attr_value(out, indent+2, "device_id", p->value);
-        else print_attr_value(out, indent+2, p->key, p->value);
+
+    /* Find split points: indices where a new action starts
+     * A new action starts when we see:
+     *   attr[i].key is a HA domain AND attr[i].value is not NULL
+     *   AND attr[i].value doesn't look like a data value (is_off, is_on, etc.)
+     * OR:
+     *   attr[i].key is a HA domain AND attr[i].value is NULL AND
+     *   attr[i+1] exists with value NULL (bare identifier = the subcmd)
+     */
+    int *split_at = calloc(attr_count + 1, sizeof(int)); /* max possible splits */
+    int num_splits = 0;
+
+    for(int i = 0; i < attr_count; i++) {
+        if(is_ha_domain(attr_arr[i]->key) && attr_arr[i]->value != NULL) {
+            /* check value is not a state check (is_off, is_on, etc) */
+            const char *v = attr_arr[i]->value;
+            if(v && strncmp(v, "is_", 3) != 0
+               && strcmp(v, "disarmed") != 0
+               && strcmp(v, "armed") != 0) {
+                split_at[num_splits++] = i;
+            }
+        }
+        /* domain as key with NULL value followed by bare identifier */
+        else if(is_ha_domain(attr_arr[i]->key) && attr_arr[i]->value == NULL) {
+            if(i+1 < attr_count && attr_arr[i+1]->value == NULL
+               && attr_arr[i+1]->key != NULL) {
+                split_at[num_splits++] = i;
+            }
+        }
     }
-    if(a->cmd) print_attr_value(out, indent+2, "domain", a->cmd);
+
+    /* Check if a domain should use action: format instead of type: */
+    int is_service_domain = (a->cmd && (
+        strcmp(a->cmd, "notify") == 0 ||
+        strcmp(a->cmd, "tts") == 0 ||
+        strcmp(a->cmd, "alexa_devices") == 0
+    ));
+
+    /* Print the first action (using a->cmd / a->subcmd) */
+    {
+        int end = (num_splits > 0) ? split_at[0] : attr_count;
+        if(is_service_domain && a->subcmd) {
+            /* Service-style action: action: domain.service */
+            print_indented(out, indent, "- action: %s.%s\n", a->cmd, a->subcmd);
+            /* Separate entity_id (target) from data attrs */
+            int has_data_attrs = 0;
+            for(int i = 0; i < end; i++) {
+                if(strcmp(attr_arr[i]->key, "entity_id") == 0) {
+                    print_indented(out, indent+2, "target:\n");
+                    print_attr_value(out, indent+4, "entity_id", attr_arr[i]->value);
+                } else {
+                    if(!has_data_attrs) {
+                        print_indented(out, indent+2, "data:\n");
+                        has_data_attrs = 1;
+                    }
+                    print_attr_value(out, indent+4, attr_arr[i]->key, attr_arr[i]->value);
+                }
+            }
+            if(!has_data_attrs) {
+                print_indented(out, indent+2, "data: {}\n");
+            }
+        } else if(a->subcmd) {
+            print_indented(out, indent, "- type: %s\n", a->subcmd);
+            for(int i = 0; i < end; i++) {
+                print_attr_value(out, indent+2, attr_arr[i]->key, attr_arr[i]->value);
+            }
+            if(a->cmd) print_attr_value(out, indent+2, "domain", a->cmd);
+        } else {
+            print_indented(out, indent, "- action: %s\n", a->cmd ? a->cmd : "");
+            for(int i = 0; i < end; i++) {
+                print_attr_value(out, indent+2, attr_arr[i]->key, attr_arr[i]->value);
+            }
+        }
+    }
+
+    /* Print each subsequent action segment */
+    for(int s = 0; s < num_splits; s++) {
+        int start = split_at[s];
+        int end = (s+1 < num_splits) ? split_at[s+1] : attr_count;
+
+        char *new_domain = attr_arr[start]->key;
+        char *new_subcmd = attr_arr[start]->value;
+        int data_start;
+
+        if(new_subcmd) {
+            /* domain + subcmd as key=domain value=subcmd */
+            data_start = start + 1;
+        } else {
+            /* domain is key with NULL value, next attr is subcmd */
+            new_subcmd = attr_arr[start+1]->key;
+            data_start = start + 2;
+        }
+
+        /* Check if this is a notify-style action that should use action: format */
+        if(strcmp(new_domain, "notify") == 0 || strcmp(new_domain, "tts") == 0
+           || strcmp(new_domain, "alexa_devices") == 0) {
+            print_indented(out, indent, "- action: %s.%s\n", new_domain, new_subcmd);
+            /* print data attrs, wrapping message etc. under data: */
+            int has_data_attrs = 0;
+            for(int i = data_start; i < end; i++) {
+                if(strcmp(attr_arr[i]->key, "entity_id") == 0) {
+                    /* entity_id goes under target: */
+                    print_indented(out, indent+2, "target:\n");
+                    print_attr_value(out, indent+4, "entity_id", attr_arr[i]->value);
+                } else {
+                    if(!has_data_attrs) {
+                        print_indented(out, indent+2, "data:\n");
+                        has_data_attrs = 1;
+                    }
+                    print_attr_value(out, indent+4, attr_arr[i]->key, attr_arr[i]->value);
+                }
+            }
+            if(!has_data_attrs) {
+                print_indented(out, indent+2, "data: {}\n");
+            }
+        } else {
+            print_indented(out, indent, "- type: %s\n", new_subcmd);
+            for(int i = data_start; i < end; i++) {
+                print_attr_value(out, indent+2, attr_arr[i]->key, attr_arr[i]->value);
+            }
+            print_attr_value(out, indent+2, "domain", new_domain);
+        }
+    }
+
+    if(attr_arr) free(attr_arr);
+    free(split_at);
 }
 
 static void print_action_delay(FILE *out, Action *a, int indent) {
@@ -272,7 +495,26 @@ void emit_yaml(Automation *a, FILE *out) {
                 }
                 p = p->next;
                 while(p) {
-                    print_attr_value(out, 4, p->key, p->value);
+                    /* Bug 6 fix: convert domain/type attrs in device triggers */
+                    if(is_trigger_domain(p->key) && p->value) {
+                        print_attr_value(out, 4, "type", p->value);
+                        print_attr_value(out, 4, "domain", p->key);
+                    }
+                    /* Bug 7 fix: convert 'for' duration to HA dict format */
+                    else if(strcmp(p->key, "for") == 0 && p->value) {
+                        int h, m, s;
+                        if(parse_duration(p->value, &h, &m, &s)) {
+                            print_indented(out, 4, "for:\n");
+                            print_indented(out, 6, "hours: %d\n", h);
+                            print_indented(out, 6, "minutes: %d\n", m);
+                            print_indented(out, 6, "seconds: %d\n", s);
+                        } else {
+                            print_attr_value(out, 4, p->key, p->value);
+                        }
+                    }
+                    else {
+                        print_attr_value(out, 4, p->key, p->value);
+                    }
                     p = p->next;
                 }
             }

@@ -6,40 +6,61 @@
   - trigger: device
     device_id: 5ab340c52c9995f0bafbc6c0dc79812e
     entity_id: b729bfc5dc7003d3bca5d64247f8dfc6
-    binary_sensor: opened
+    type: opened
+    domain: binary_sensor
     id: Aberta
   - trigger: device
     device_id: 5ab340c52c9995f0bafbc6c0dc79812e
     entity_id: b729bfc5dc7003d3bca5d64247f8dfc6
-    binary_sensor: opened
-    for: 00h01m00s
+    type: opened
+    domain: binary_sensor
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
     id: 'Aberta 1 min'
   - trigger: device
     device_id: 5ab340c52c9995f0bafbc6c0dc79812e
     entity_id: b729bfc5dc7003d3bca5d64247f8dfc6
-    binary_sensor: not_opened
+    type: not_opened
+    domain: binary_sensor
     id: Fechada
   actions:
     - if:
+      - condition: trigger
+        id: Aberta
       - condition: state
+        entity_id: switch.luzes_da_sala
         state: 'off'
-        trigger: Aberta
+      - condition: device
+        device_id: 9effd46c0c669c81be568b6baf21a14c
+        entity_id: eea259ec8e8a95d09dd5c7d8619d1658
+        type: is_off
+        domain: media_player
+      - condition: device
+        device_id: d9c64e91476cb5a39d1fdf508673f900
+        entity_id: ccc6d60a59506b4beb48870f9263604a
+        type: is_off
+        domain: media_player
       then:
         - type: turn_on
           device_id: 5f9afdf1309a0b93f968874d8987f9ff
           entity_id: 67a209bb0d8363e1f2526bdbba20ba71
-          notify: mobile_app_zfold4
-          message: 'Porta aberta e luz de entrada ligada!'
-          domain: switch
+          domain: light
+        - action: notify.mobile_app_zfold4
+          data:
+            message: 'Porta aberta e luz de entrada ligada!'
     - if:
       - condition: trigger
         id: 'Aberta 1 min'
       then:
-        - type: send_message
-          message: 'Porta aberta há mais de 1 minuto!'
-          entity_id:
-            - notify.echo_show_8_speak
-            - notify.music_frame_alexa_speak
-          notify: mobile_app_zfold4
-          message: 'Porta aberta por 1 minuto!'
-          domain: notify
+        - action: notify.send_message
+          data:
+            message: 'Porta aberta há mais de 1 minuto!'
+          target:
+            entity_id:
+              - notify.echo_show_8_speak
+              - notify.music_frame_alexa_speak
+        - action: notify.mobile_app_zfold4
+          data:
+            message: 'Porta aberta por 1 minuto!'

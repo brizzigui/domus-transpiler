@@ -29,7 +29,8 @@ create 'Nicole - LED da TV':
             enabled false
         ),
         (
-            alarm_control_panel is disarmed
+            entity_id alarm_control_panel.alarmo
+            state is disarmed
         )
     ]
 

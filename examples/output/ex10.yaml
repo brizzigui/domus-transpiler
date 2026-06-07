@@ -6,11 +6,13 @@
   - trigger: device
     device_id: 7316cbacc8493fa41d960855d7b84651
     entity_id: 9b6b660ce19b4b6c1d36e0534e94f51c
-    binary_sensor: motion
+    type: motion
+    domain: binary_sensor
   - trigger: device
     device_id: 09e07aaa640d6b67e0102d3da11c85f6
     entity_id: 5e8d44a8bf2542a3a9c249de1dcaff20
-    binary_sensor: motion
+    type: motion
+    domain: binary_sensor
   conditions:
   - condition: state
     entity_id: switch.luzes_da_cozinha
@@ -25,9 +27,9 @@
     - type: turn_on
       entity_id: switch.ilha_interruptor_1
       domain: switch
-    - type: mobile_app_zfold4
-      message: 'Movimento noturno na sala '
-      domain: notify
+    - action: notify.mobile_app_zfold4
+      data:
+        message: 'Movimento noturno na sala '
     - delay:
       hours: 0
       minutes: 4

@@ -28,8 +28,9 @@
     entity_id: binary_sensor.eric_motion_sensor_quarto
     id: Liberado2
   conditions:
-  - condition: 
-    alarm_control_panel: disarmed
+  - condition: state
+    entity_id: alarm_control_panel.alarmo
+    state: disarmed
   actions:
     - if:
       - condition: trigger
@@ -42,18 +43,20 @@
           entity_id: timer.quarto_eric
           domain: timer
         - if:
-          - condition: 
-            alarm_control_panel: disarmed
-            switch.sonoff_10018dee48_3: off
+          - condition: state
+            entity_id: alarm_control_panel.alarmo
+            state: disarmed
+          - condition: state
+            entity_id: switch.sonoff_10018dee48_3
+            state: 'off'
           then:
             - type: turn_on
-              target: 
               entity_id: switch.sonoff_10018de98b_3
-              type: turn_on
+              domain: switch
+            - type: turn_on
               device_id: 6ca8db2cd6cb58a49ec19e1a2de654a1
               entity_id: 1e5dbdfba8fce27d9c0b427b3c109531
               domain: light
-              domain: switch
     - if:
       - condition: trigger
         id: Movimento_ocioso
@@ -82,17 +85,20 @@
             - switch.eric_led_da_tv_tomada_1
             - switch.sonoff_10018de98b_3
             - switch.wifi_breaker_3_interruptor_1
-          light: turn_off
+          domain: switch
+        - type: turn_off
           device_id: be022c4355e8e71c2331ee1c0a485fd3
           entity_id: 627a27a968c5244807bdbcc477080e21
-          light: turn_off
+          domain: light
+        - type: turn_off
           device_id: 6ca8db2cd6cb58a49ec19e1a2de654a1
           entity_id: 1e5dbdfba8fce27d9c0b427b3c109531
-          domain: switch
+          domain: light
     - if:
       - condition: trigger
-        id: Liberado
-        id: Liberado2
+        id:
+          - Liberado
+          - Liberado2
       then:
         - type: start
           entity_id: timer.quarto_eric

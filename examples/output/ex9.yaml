@@ -6,12 +6,14 @@
   - trigger: device
     device_id: 8bab4f915657ed4ea1b1151603b2b9e9
     entity_id: 2a3fe028eb0da3f11e73437fe3b34b5d
-    switch: turned_on
+    type: turned_on
+    domain: switch
     id: Ligado
   - trigger: device
     device_id: 8bab4f915657ed4ea1b1151603b2b9e9
     entity_id: 2a3fe028eb0da3f11e73437fe3b34b5d
-    switch: turned_off
+    type: turned_off
+    domain: switch
     id: Desligado
   conditions:
   - condition: device

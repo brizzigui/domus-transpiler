@@ -14,15 +14,17 @@
   - trigger: device
     device_id: 902962bccd850d600c733825ce64149b
     entity_id: 40cb89919c68a62f97d1c5f343e36f30
-    binary_sensor: turned_on
+    type: turned_on
+    domain: binary_sensor
     id: 'Movimento cama'
   - trigger: state
     to: 'on'
     entity_id: binary_sensor.sonoff_a440036eb8
     id: Detector
   conditions:
-  - condition: 
-    alarm_control_panel: disarmed
+  - condition: state
+    entity_id: alarm_control_panel.alarmo
+    state: disarmed
   actions:
     - if:
       - condition: trigger
@@ -67,10 +69,11 @@
           milliseconds: 0
         - type: turn_off
           entity_id: light.arandela_suite
-          switch: turn_off
+          domain: light
+        - type: turn_off
           device_id: 6fd6b17870c0345ad8bf36fb086fca49
           entity_id: 726fc9c450c2044cc6bf5b4d8508436c
-          domain: light
+          domain: switch
         - delay:
           hours: 0
           minutes: 0

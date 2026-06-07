@@ -6,12 +6,14 @@
   - trigger: device
     device_id: 275d68e2aa61f9229082505ddab26cd2
     entity_id: e26d13dc064b552d0c4c5b1401328d9a
-    switch: turned_off
+    type: turned_off
+    domain: switch
     id: Desativado
   - trigger: device
     device_id: 275d68e2aa61f9229082505ddab26cd2
     entity_id: e26d13dc064b552d0c4c5b1401328d9a
-    switch: turned_on
+    type: turned_on
+    domain: switch
     id: Ativado
   conditions:
   - condition: device
@@ -20,8 +22,9 @@
     type: is_off
     domain: switch
     enabled: false
-  - condition: 
-    alarm_control_panel: disarmed
+  - condition: state
+    entity_id: alarm_control_panel.alarmo
+    state: disarmed
   actions:
     - if:
       - condition: trigger

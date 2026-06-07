@@ -6,22 +6,26 @@
   - trigger: device
     device_id: d8e4c9d44f0588ccf8c0fe1a1e7afd7a
     entity_id: 73bd5ca47e3ec3a9bc6a463e0ae0dc98
-    switch: turned_on
+    type: turned_on
+    domain: switch
     id: 'Tuya on'
   - trigger: device
     device_id: d8e4c9d44f0588ccf8c0fe1a1e7afd7a
     entity_id: 73bd5ca47e3ec3a9bc6a463e0ae0dc98
-    switch: turned_off
+    type: turned_off
+    domain: switch
     id: 'Tuya off'
   - trigger: device
     device_id: 17577b83efd0951c4002cd6c7b91053c
     entity_id: dac219311283b7d5262d710d8f61b278
-    switch: turned_on
+    type: turned_on
+    domain: switch
     id: 'Sonoff on'
   - trigger: device
     device_id: 17577b83efd0951c4002cd6c7b91053c
     entity_id: dac219311283b7d5262d710d8f61b278
-    switch: turned_off
+    type: turned_off
+    domain: switch
     id: 'Sonoff off'
   actions:
     - if:

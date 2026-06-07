@@ -33,16 +33,22 @@ create 'Suite - botão Dani':
                 trigger is Single
             )
 
-                if (
-                    state is 'off'
-                )
+                if [
+                    (
+                        entity_id switch.luzes_da_suite
+                        state is 'off'
+                    )
+                ]
                 
                     light turn_on
                     entity_id light.arandela_suite
 
-                else if (
-                    state is 'on'
-                )
+                else if [
+                    (
+                        entity_id switch.luzes_da_suite
+                        state is 'on'
+                    )
+                ]
 
                     switch turn_off
                     entity_id [

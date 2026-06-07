@@ -6,7 +6,8 @@
   - trigger: device
     device_id: 8bab4f915657ed4ea1b1151603b2b9e9
     entity_id: b2b332adfb28616f2a8a705c922f6ead
-    switch: turned_on
+    type: turned_on
+    domain: switch
   conditions:
   - condition: sun
     before: sunrise
@@ -23,10 +24,10 @@
         - 5f9afdf1309a0b93f968874d8987f9ff
         - b367687260d5c280782ca2662bc32784
       domain: switch
-    - type: send_text_command
-      device_id: 38496a203273bbff294d6465d4042e55
-      text_command: 'desligar tela'
-      domain: alexa_devices
+    - action: alexa_devices.send_text_command
+      data:
+        device_id: 38496a203273bbff294d6465d4042e55
+        text_command: 'desligar tela'
     - type: turn_off
       entity_id:
         - media_player.music_frame_2
@@ -35,11 +36,11 @@
         - media_player.home_theater_2
         - media_player.tx_nr5100
       domain: media_player
-    - type: send_text_command
-      device_id: 38496a203273bbff294d6465d4042e55
-      text_command: 'desligar tela'
-      domain: alexa_devices
-    - type: send_text_command
-      device_id: 43ae6cf18c1b53649e81393dee7d7daa
-      text_command: 'desligar tela'
-      domain: alexa_devices
+    - action: alexa_devices.send_text_command
+      data:
+        device_id: 38496a203273bbff294d6465d4042e55
+        text_command: 'desligar tela'
+    - action: alexa_devices.send_text_command
+      data:
+        device_id: 43ae6cf18c1b53649e81393dee7d7daa
+        text_command: 'desligar tela'

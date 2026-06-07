@@ -16,8 +16,9 @@
     entity_id: binary_sensor.tze200_3towulqd_ts0601_ocupacao
     id: Liberado
   conditions:
-  - condition: 
-    alarm_control_panel: disarmed
+  - condition: state
+    entity_id: alarm_control_panel.alarmo
+    state: disarmed
   actions:
     - if:
       - condition: trigger
@@ -28,6 +29,7 @@
           domain: timer
         - if:
           - condition: state
+            entity_id: switch.sonoff_10018dee48_3
             state: 'off'
           then:
             - type: turn_on
@@ -59,14 +61,16 @@
           milliseconds: 0
         - type: turn_off
           device_id: afab14d6c5d511f765acf8ab4d133ef0
-          switch: turn_off
+          domain: media_player
+        - type: turn_off
           entity_id:
             - switch.luzes_da_nicole
             - switch.espelho_banheiro_nicole_interruptor_1
-          light: turn_off
+          domain: switch
+        - type: turn_off
           device_id: 5bd4ebd22dcd5e84cf3e8570dbcc12f7
           entity_id: 7fdd514f2abd8ee085763019ba618a6a
-          domain: media_player
+          domain: light
     - if:
       - condition: trigger
         id: Liberado

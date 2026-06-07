@@ -3,9 +3,11 @@
   description: ''
   mode: single
   triggers:
-  - trigger: time_before
+  - trigger: time
+    at: 22:30:00
     id: 'Abrir blackout'
-  - trigger: time_before
+  - trigger: time
+    at: 12:30:00
     id: 'Abrir cortina'
   conditions:
   - condition: device

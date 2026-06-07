@@ -14,11 +14,13 @@
   - trigger: device
     device_id: 9a58a7513855478673b36aab01b68238
     entity_id: 1e1e192bce0cdc593a3e72dc6e996b46
-    binary_sensor: motion
+    type: motion
+    domain: binary_sensor
     id: Detectou
   conditions:
-  - condition: 
-    alarm_control_panel: disarmed
+  - condition: state
+    entity_id: alarm_control_panel.alarmo
+    state: disarmed
   actions:
     - if:
       - condition: trigger

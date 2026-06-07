@@ -27,13 +27,15 @@
       - media_player.onkyo_tx_nr5100_f563ca_2
       - media_player.tx_nr5100
     id: 'Sub ligou'
-  - trigger: time_before
+  - trigger: time
+    at: 23:00:00
     id: Hora
   actions:
     - if:
       - condition: trigger
-        id: 'Sub desligou'
-        id: Hora
+        id:
+          - 'Sub desligou'
+          - Hora
       then:
         - type: turn_off
           device_id: 65521d4287a75a2c1bf685cb7af2a38b

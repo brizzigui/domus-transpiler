@@ -145,7 +145,12 @@ attr:
     }
     | TIMEKW AFTER TIME_LITERAL { $$ = ast_new_attr("time_after", $3); }
     | TIMEKW BEFORE TIME_LITERAL { $$ = ast_new_attr("time_before", $3); }
-    | TIMEKW AT TIME_LITERAL { $$ = ast_new_attr("time_before", $3); }
+    | TIMEKW AT TIME_LITERAL {
+        Attr *t = ast_new_attr("time", NULL);
+        Attr *at = ast_new_attr("at", $3);
+        t->next = at;
+        $$ = t;
+    }
     | BEFORE IDENTIFIER { $$ = ast_new_attr("before", $2); }
     | AFTER IDENTIFIER { $$ = ast_new_attr("after", $2); }
     | STATEKW CHANGES to_from IDENTIFIER { $$ = ast_new_attr("state", $4); }
@@ -189,6 +194,8 @@ attr:
     | BELOW NUMBER { $$ = ast_new_attr("below", $2); }
     | IDENTIFIER { $$ = ast_new_attr($1, NULL); }
     ;
+
+
 
 id_list:
         STRING {

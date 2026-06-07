@@ -33,8 +33,29 @@ create 'Sala - porta de entrada':
 
     do [
         (
-            if ( trigger is Aberta and state is 'off' )
-                switch turn_on
+            if [
+                (
+                    trigger is Aberta
+                )
+                and
+                (
+                    entity_id switch.luzes_da_sala
+                    state is 'off'
+                )
+                and
+                (
+                    device_id 9effd46c0c669c81be568b6baf21a14c
+                    entity_id eea259ec8e8a95d09dd5c7d8619d1658
+                    media_player is_off
+                )
+                and
+                (
+                    device_id d9c64e91476cb5a39d1fdf508673f900
+                    entity_id ccc6d60a59506b4beb48870f9263604a
+                    media_player is_off
+                )
+            ]
+                light turn_on
                 device_id 5f9afdf1309a0b93f968874d8987f9ff
                 entity_id 67a209bb0d8363e1f2526bdbba20ba71
                 notify mobile_app_zfold4

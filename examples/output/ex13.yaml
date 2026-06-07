@@ -6,22 +6,25 @@
   - trigger: device
     device_id: 6fd6b17870c0345ad8bf36fb086fca49
     entity_id: 57b28338c5ca8de7d7763d4539ce4e07
-    switch: turned_on
+    type: turned_on
+    domain: switch
   - trigger: device
     device_id: df57e4531b088a9e6a4f332bfd0f66f3
     entity_id: f3669be2d38feb3b98c2d8c46ff1b0c6
-    switch: turned_on
+    type: turned_on
+    domain: switch
   - trigger: device
     device_id: 29a6e005da8e23c1addc976e2d2aab4c
     entity_id: 309e55113b9cbea58b69fcbbedb21811
-    sensor: volume_flow_rate
+    type: volume_flow_rate
+    domain: sensor
     above: 2
   conditions:
   - condition: time
     after: 15:00:00
   - condition: time
     before: 23:59:00
-  - condition: 
+  - condition: time
     weekday:
       - sat
       - fri

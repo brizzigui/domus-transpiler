@@ -22,6 +22,7 @@
       then:
         - if:
           - condition: state
+            entity_id: switch.luzes_da_suite
             state: 'off'
           then:
             - type: turn_on
@@ -30,6 +31,7 @@
           else:
             - if:
               - condition: state
+                entity_id: switch.luzes_da_suite
                 state: 'on'
               then:
                 - type: turn_off
@@ -39,19 +41,22 @@
                     - switch.sonoff_10018dee48_1
                     - switch.luzes_da_suite
                   device_id: df57e4531b088a9e6a4f332bfd0f66f3
-                  switch: turn_on
+                  domain: switch
+                - type: turn_on
                   device_id: 17577b83efd0951c4002cd6c7b91053c
                   entity_id: bb97c45f407329aca067d3f274499a81
-                  timer: finish
+                  domain: switch
+                - type: finish
                   entity_id:
                     - timer.quarto_eric
                     - timer.corredor
                     - timer.quarto_nicole
                     - timer.closet
                     - timer.banho_nicole
-                  light: turn_off
+                  domain: timer
+                - type: turn_off
                   entity_id: light.fita_led_rgb_5m
-                  domain: switch
+                  domain: light
     - if:
       - condition: trigger
         id: 'Double '

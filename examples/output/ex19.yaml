@@ -3,7 +3,8 @@
   description: ''
   mode: single
   triggers:
-  - trigger: time_before
+  - trigger: time
+    at: 05:00:00
   actions:
     - type: turn_off
       device_id: ffd3af79d524466a845af9632fa93a8e
