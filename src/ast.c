@@ -5,8 +5,9 @@
 
 static char *strdup_safe(const char *s) { if(!s) return NULL; char *r = malloc(strlen(s)+1); strcpy(r,s); return r; }
 
-Automation *ast_new_automation(char *alias) {
+Automation *ast_new_automation(int line, char *alias) {
     Automation *a = calloc(1, sizeof(Automation));
+    a->line = line;
     a->alias = alias ? strdup_safe(alias) : NULL;
     a->id = NULL;
     a->description = NULL;
@@ -28,8 +29,9 @@ void ast_append_automation(Automation **head, Automation **tail, Automation *a) 
 }
 
 /* Attr helpers */
-Attr *ast_new_attr(char *k, char *v) {
+Attr *ast_new_attr(int line, char *k, char *v) {
     Attr *a = malloc(sizeof(Attr));
+    a->line = line;
     a->key = k ? strdup_safe(k) : NULL;
     a->value = v ? strdup_safe(v) : NULL;
     a->next = NULL;
@@ -41,7 +43,7 @@ void ast_append_attr(Attr **list, Attr *a) {
     Attr *p = *list; while(p->next) p = p->next; p->next = a;
 }
 
-Item *ast_new_item(void) { Item *it = calloc(1, sizeof(Item)); it->attrs = NULL; it->next = NULL; return it; }
+Item *ast_new_item(int line) { Item *it = calloc(1, sizeof(Item)); it->line = line; it->attrs = NULL; it->next = NULL; return it; }
 void ast_item_set_attrs(Item *it, Attr *attrs) { if(!it) return; it->attrs = attrs; }
 
 Item *ast_append_item_list(Item *head, Item *tail) {
@@ -56,8 +58,9 @@ void ast_append_items(Item **dest, Item *src) {
 }
 
 /* Actions */
-Action *ast_new_action_simple(char *cmd, char *subcmd, Attr *attrs) {
+Action *ast_new_action_simple(int line, char *cmd, char *subcmd, Attr *attrs) {
     Action *a = calloc(1, sizeof(Action));
+    a->line = line;
     a->kind = ACT_SIMPLE;
     a->cmd = cmd ? strdup_safe(cmd) : NULL;
     a->subcmd = subcmd ? strdup_safe(subcmd) : NULL;
@@ -69,8 +72,9 @@ Action *ast_new_action_simple(char *cmd, char *subcmd, Attr *attrs) {
     return a;
 }
 
-Action *ast_new_action_delay(char *duration) {
+Action *ast_new_action_delay(int line, char *duration) {
     Action *a = calloc(1, sizeof(Action));
+    a->line = line;
     a->kind = ACT_DELAY;
     a->cmd = NULL;
     a->subcmd = duration ? strdup_safe(duration) : NULL;
@@ -82,8 +86,9 @@ Action *ast_new_action_delay(char *duration) {
     return a;
 }
 
-Action *ast_new_action_automation_trigger(Attr *attrs) {
+Action *ast_new_action_automation_trigger(int line, Attr *attrs) {
     Action *a = calloc(1, sizeof(Action));
+    a->line = line;
     a->kind = ACT_AUTOMATION_TRIGGER;
     a->cmd = NULL;
     a->subcmd = NULL;
@@ -95,8 +100,9 @@ Action *ast_new_action_automation_trigger(Attr *attrs) {
     return a;
 }
 
-Action *ast_new_action_if(Item *cond_items, Action *then_actions, Action *else_action) {
+Action *ast_new_action_if(int line, Item *cond_items, Action *then_actions, Action *else_action) {
     Action *a = calloc(1, sizeof(Action));
+    a->line = line;
     a->kind = ACT_IF;
     a->cmd = NULL;
     a->subcmd = NULL;

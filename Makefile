@@ -9,8 +9,8 @@ src/lexer.yy.c: src/lexer.l src/parser.tab.h
 	@echo "Running flex..."
 	@flex -o src/lexer.yy.c src/lexer.l
 
-domus-transpiler: src/parser.tab.c src/lexer.yy.c src/ast.c src/yaml.c
-	@gcc -g -o domus-transpiler src/parser.tab.c src/lexer.yy.c src/ast.c src/yaml.c -lfl
+domus-transpiler: src/parser.tab.c src/lexer.yy.c src/ast.c src/yaml.c src/symtab.c src/semantic.c
+	@gcc -g -o domus-transpiler src/parser.tab.c src/lexer.yy.c src/ast.c src/yaml.c src/symtab.c src/semantic.c -lfl
 
 run: domus-transpiler
 	@mkdir -p examples/output

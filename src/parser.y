@@ -56,7 +56,7 @@ program:
         ;
 
 automation:
-    CREATE STRING { cur_aut = ast_new_automation($2); } COLON fields {
+    CREATE STRING { cur_aut = ast_new_automation(yylineno, $2); } COLON fields {
         ast_append_automation(&automations_head, &automations_tail, cur_aut);
         cur_aut = NULL;
     }
@@ -86,7 +86,7 @@ listen_items:
     ;
 
 listen_item:
-        LPAREN attr_list RPAREN { Item *it = ast_new_item(); ast_item_set_attrs(it, $2); $$ = it; }
+        LPAREN attr_list RPAREN { Item *it = ast_new_item(yylineno); ast_item_set_attrs(it, $2); $$ = it; }
     | LPAREN error RPAREN { $$ = NULL; yyerrok; }
     ;
 
@@ -97,7 +97,7 @@ condition_items:
     ;
 
 condition_item:
-        LPAREN attr_list RPAREN { Item *it = ast_new_item(); ast_item_set_attrs(it, $2); $$ = it; }
+        LPAREN attr_list RPAREN { Item *it = ast_new_item(yylineno); ast_item_set_attrs(it, $2); $$ = it; }
     | LPAREN error RPAREN { $$ = NULL; yyerrok; }
     ;
 
@@ -117,10 +117,10 @@ attr_seq:
 
 /* cond_unit produces a single Item* (either a parenthesized attr_list, bracketed condition_items, or an attr_seq converted to an Item) */
 cond_unit:
-            LPAREN attr_list RPAREN { Item *it = ast_new_item(); ast_item_set_attrs(it, $2); $$ = it; }
-        | LPAREN attr_seq RPAREN { Item *it = ast_new_item(); ast_item_set_attrs(it, $2); $$ = it; }
+            LPAREN attr_list RPAREN { Item *it = ast_new_item(yylineno); ast_item_set_attrs(it, $2); $$ = it; }
+        | LPAREN attr_seq RPAREN { Item *it = ast_new_item(yylineno); ast_item_set_attrs(it, $2); $$ = it; }
         | LBRACKET cond_seq RBRACKET { $$ = $2; }
-        | attr_seq { Item *it = ast_new_item(); ast_item_set_attrs(it, $1); $$ = it; }
+        | attr_seq { Item *it = ast_new_item(yylineno); ast_item_set_attrs(it, $1); $$ = it; }
         | LPAREN error RPAREN { $$ = NULL; yyerrok; }
         ;
 
@@ -137,66 +137,66 @@ to_from:
     ;
 
 attr:
-        DEVICE_ID IDENTIFIER { $$ = ast_new_attr("device_id", $2); }
-    | DEVICE_ID LBRACKET id_list RBRACKET { $$ = ast_new_attr("device_id", $3); }
-    | ENTITY_ID IDENTIFIER { $$ = ast_new_attr("entity_id", $2); }
-    | ENTITY_ID LBRACKET id_list RBRACKET { $$ = ast_new_attr("entity_id", $3); }
-    | STATEKW IS IDENTIFIER { $$ = ast_new_attr("state", $3); }
+        DEVICE_ID IDENTIFIER { $$ = ast_new_attr(yylineno, "device_id", $2); }
+    | DEVICE_ID LBRACKET id_list RBRACKET { $$ = ast_new_attr(yylineno, "device_id", $3); }
+    | ENTITY_ID IDENTIFIER { $$ = ast_new_attr(yylineno, "entity_id", $2); }
+    | ENTITY_ID LBRACKET id_list RBRACKET { $$ = ast_new_attr(yylineno, "entity_id", $3); }
+    | STATEKW IS IDENTIFIER { $$ = ast_new_attr(yylineno, "state", $3); }
     | STATEKW IS STRING {
         char *quoted = malloc(strlen($3) + 3); /* ' + string + ' + \0 */
         sprintf(quoted, "'%s'", $3);
-        $$ = ast_new_attr("state", quoted);
+        $$ = ast_new_attr(yylineno, "state", quoted);
     }
-    | TIMEKW AFTER TIME_LITERAL { $$ = ast_new_attr("time_after", $3); }
-    | TIMEKW BEFORE TIME_LITERAL { $$ = ast_new_attr("time_before", $3); }
+    | TIMEKW AFTER TIME_LITERAL { $$ = ast_new_attr(yylineno, "time_after", $3); }
+    | TIMEKW BEFORE TIME_LITERAL { $$ = ast_new_attr(yylineno, "time_before", $3); }
     | TIMEKW AT TIME_LITERAL {
-        Attr *t = ast_new_attr("time", NULL);
-        Attr *at = ast_new_attr("at", $3);
+        Attr *t = ast_new_attr(yylineno, "time", NULL);
+        Attr *at = ast_new_attr(yylineno, "at", $3);
         t->next = at;
         $$ = t;
     }
-    | BEFORE IDENTIFIER { $$ = ast_new_attr("before", $2); }
-    | AFTER IDENTIFIER { $$ = ast_new_attr("after", $2); }
-    | STATEKW CHANGES to_from IDENTIFIER { $$ = ast_new_attr("state", $4); }
+    | BEFORE IDENTIFIER { $$ = ast_new_attr(yylineno, "before", $2); }
+    | AFTER IDENTIFIER { $$ = ast_new_attr(yylineno, "after", $2); }
+    | STATEKW CHANGES to_from IDENTIFIER { $$ = ast_new_attr(yylineno, "state", $4); }
     | STATEKW CHANGES to_from STRING {
         char *quoted = malloc(strlen($4) + 3); /* ' + string + ' + \0 */
         sprintf(quoted, "'%s'", $4);
-        $$ = ast_new_attr("state", quoted);
+        $$ = ast_new_attr(yylineno, "state", quoted);
     }
-    | EVENT IDENTIFIER { $$ = ast_new_attr("event", $2); }
-    | ID IDENTIFIER { $$ = ast_new_attr("id", $2); }
+    | EVENT IDENTIFIER { $$ = ast_new_attr(yylineno, "event", $2); }
+    | ID IDENTIFIER { $$ = ast_new_attr(yylineno, "id", $2); }
     | ID STRING {
         char *quoted = malloc(strlen($2) + 3); /* ' + string + ' + \0 */
         sprintf(quoted, "'%s'", $2);
-        $$ = ast_new_attr("id", quoted);
+        $$ = ast_new_attr(yylineno, "id", quoted);
     }
-    | TRIGGERKW IS IDENTIFIER { $$ = ast_new_attr("trigger", $3); }
+    | TRIGGERKW IS IDENTIFIER { $$ = ast_new_attr(yylineno, "trigger", $3); }
     | TRIGGERKW IS STRING {
         char *quoted = malloc(strlen($3) + 3); /* ' + string + ' + \0 */
         sprintf(quoted, "'%s'", $3);
-        $$ = ast_new_attr("trigger", quoted); 
+        $$ = ast_new_attr(yylineno, "trigger", quoted); 
     }
-    | IDENTIFIER IS IDENTIFIER { $$ = ast_new_attr($1, $3); }
-    | IDENTIFIER IDENTIFIER { $$ = ast_new_attr($1, $2); }
+    | IDENTIFIER IS IDENTIFIER { $$ = ast_new_attr(yylineno, $1, $3); }
+    | IDENTIFIER IDENTIFIER { $$ = ast_new_attr(yylineno, $1, $2); }
     | IDENTIFIER STRING {
         char *quoted = malloc(strlen($2) + 3); /* ' + string + ' + \0 */
         sprintf(quoted, "'%s'", $2);
-        $$ = ast_new_attr($1, quoted); 
+        $$ = ast_new_attr(yylineno, $1, quoted); 
     }
-    | IDENTIFIER LBRACKET id_list RBRACKET { $$ = ast_new_attr($1, $3); }
-    | IDENTIFIER IS IDENTIFIER LBRACKET id_list RBRACKET { size_t n = strlen($3) + 1 + strlen($5) + 1; char *buf = malloc(n); strcpy(buf, $3); strcat(buf, ","); strcat(buf, $5); $$ = ast_new_attr($1, buf); free(buf); }
-    | STATEKW IS ANY LBRACKET id_list RBRACKET {$$ = ast_new_attr("state", $5);}
-    | TRIGGERKW IS ANY LBRACKET id_list RBRACKET {$$ = ast_new_attr("trigger", $5);}
-    | IDENTIFIER IS ANY LBRACKET id_list RBRACKET {$$ = ast_new_attr($1, $5);}
-    | OFFSET DURATION_LITERAL { $$ = ast_new_attr("offset", $2); }
-    | FOR DURATION_LITERAL { $$ = ast_new_attr("for", $2); }
-    | SKIP_CONDITION IDENTIFIER { $$ = ast_new_attr("skip_condition", $2); }
-    | CHANGES to_from IDENTIFIER { $$ = ast_new_attr("changes_to", $3); }
-    | WITH IDENTIFIER LBRACKET id_list RBRACKET { $$ = ast_new_attr($2, $4); }
-    | IDENTIFIER NUMBER { $$ = ast_new_attr($1, $2); }
-    | ABOVE NUMBER { $$ = ast_new_attr("above", $2); }
-    | BELOW NUMBER { $$ = ast_new_attr("below", $2); }
-    | IDENTIFIER { $$ = ast_new_attr($1, NULL); }
+    | IDENTIFIER LBRACKET id_list RBRACKET { $$ = ast_new_attr(yylineno, $1, $3); }
+    | IDENTIFIER IS IDENTIFIER LBRACKET id_list RBRACKET { size_t n = strlen($3) + 1 + strlen($5) + 1; char *buf = malloc(n); strcpy(buf, $3); strcat(buf, ","); strcat(buf, $5); $$ = ast_new_attr(yylineno, $1, buf); free(buf); }
+    | STATEKW IS ANY LBRACKET id_list RBRACKET {$$ = ast_new_attr(yylineno, "state", $5);}
+    | TRIGGERKW IS ANY LBRACKET id_list RBRACKET {$$ = ast_new_attr(yylineno, "trigger", $5);}
+    | IDENTIFIER IS ANY LBRACKET id_list RBRACKET {$$ = ast_new_attr(yylineno, $1, $5);}
+    | OFFSET DURATION_LITERAL { $$ = ast_new_attr(yylineno, "offset", $2); }
+    | FOR DURATION_LITERAL { $$ = ast_new_attr(yylineno, "for", $2); }
+    | SKIP_CONDITION IDENTIFIER { $$ = ast_new_attr(yylineno, "skip_condition", $2); }
+    | CHANGES to_from IDENTIFIER { $$ = ast_new_attr(yylineno, "changes_to", $3); }
+    | WITH IDENTIFIER LBRACKET id_list RBRACKET { $$ = ast_new_attr(yylineno, $2, $4); }
+    | IDENTIFIER NUMBER { $$ = ast_new_attr(yylineno, $1, $2); }
+    | ABOVE NUMBER { $$ = ast_new_attr(yylineno, "above", $2); }
+    | BELOW NUMBER { $$ = ast_new_attr(yylineno, "below", $2); }
+    | IDENTIFIER { $$ = ast_new_attr(yylineno, $1, NULL); }
     ;
 
 
@@ -229,7 +229,7 @@ action_item:
 
 action_body:
         IF condition_group action_block else_part {
-                $$ = ast_new_action_if($2, $3, $4);
+                $$ = ast_new_action_if(yylineno, $2, $3, $4);
         }
     | simple_action { $$ = $1; }
     ;
@@ -241,7 +241,8 @@ condition_group:
 action_stmt:
         simple_action
     | IF condition_group action_block else_part
-      { $$ = ast_new_action_if($2, $3, $4); }
+      { $$ = ast_new_action_if(yylineno, $2, $3, $4); }
+    | LPAREN action_stmt RPAREN { $$ = $2; }
     ;
 
 action_block:
@@ -258,18 +259,29 @@ action_block:
               $$ = $1;
           }
       }
+    | action_block COMMA action_stmt
+      {
+          Action *p = $1;
+          if (!p)
+              $$ = $3;
+          else {
+              while (p->next) p = p->next;
+              p->next = $3;
+              $$ = $1;
+          }
+      }
     ;
 
 else_part:
-        ELSE IF condition_group action_block else_part { Action *ifnode = ast_new_action_if($3, $4, $5); $$ = ifnode; }
+        ELSE IF condition_group action_block else_part { Action *ifnode = ast_new_action_if(yylineno, $3, $4, $5); $$ = ifnode; }
     | ELSE action_block { $$ = $2; }
     | /* empty */ { $$ = NULL; }
     ;
 
 simple_action:
-        DELAY DURATION_LITERAL { $$ = ast_new_action_delay($2); }
-    | AUTOMATION TRIGGERKW attr_list { $$ = ast_new_action_automation_trigger($3); }
-    | IDENTIFIER IDENTIFIER attr_list { $$ = ast_new_action_simple($1, $2, $3); }
+        DELAY DURATION_LITERAL { $$ = ast_new_action_delay(yylineno, $2); }
+    | AUTOMATION TRIGGERKW attr_list { $$ = ast_new_action_automation_trigger(yylineno, $3); }
+    | IDENTIFIER IDENTIFIER attr_list { $$ = ast_new_action_simple(yylineno, $1, $2, $3); }
     ;
 
 %%
@@ -288,13 +300,17 @@ void yyerror(const char *s) {
         parser_error_count++;
 }
 
+#include "semantic.h"
+
 int main(int argc, char **argv) {
     yydebug = 0; /* debug on */
     if (yyparse() == 0) {
-        Automation *a = automations_head;
-        while(a) {
-            emit_yaml(a, stdout);
-            a = a->next;
+        if (semantic_analyze(automations_head)) {
+            Automation *a = automations_head;
+            while(a) {
+                emit_yaml(a, stdout);
+                a = a->next;
+            }
         }
         ast_free_automation(automations_head);
     }

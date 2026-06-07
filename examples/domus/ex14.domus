@@ -53,22 +53,22 @@ create 'Nicole - movimento':
         ),
         (
             if ( trigger is Movimento_ocioso )
-                switch turn_off
-                entity_id switch.sonoff_10026c409b_2
-                delay 00h01m00s00ms
-                switch turn_off
-                entity_id switch.sonoff_10026c409b_1
-                delay 00h01m00s00ms
-                media_player turn_off
-                device_id afab14d6c5d511f765acf8ab4d133ef0
-                switch turn_off
-                entity_id [
-                    switch.luzes_da_nicole,
-                    switch.espelho_banheiro_nicole_interruptor_1
-                ]
-                light turn_off
-                device_id 5bd4ebd22dcd5e84cf3e8570dbcc12f7
-                entity_id 7fdd514f2abd8ee085763019ba618a6a
+                ( switch turn_off
+                  entity_id switch.sonoff_10026c409b_2 ),
+                ( delay 00h01m00s00ms ),
+                ( switch turn_off
+                  entity_id switch.sonoff_10026c409b_1 ),
+                ( delay 00h01m00s00ms ),
+                ( media_player turn_off
+                  device_id afab14d6c5d511f765acf8ab4d133ef0 ),
+                ( switch turn_off
+                  entity_id [
+                      switch.luzes_da_nicole,
+                      switch.espelho_banheiro_nicole_interruptor_1
+                  ] ),
+                ( light turn_off
+                  device_id 5bd4ebd22dcd5e84cf3e8570dbcc12f7
+                  entity_id 7fdd514f2abd8ee085763019ba618a6a )
 
         ),
         (

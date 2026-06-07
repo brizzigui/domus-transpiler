@@ -1,0 +1,20 @@
+create 'Test Semantic Error':
+    listen [
+        (
+            state
+            changes to 'on'
+            entity_id binary_sensor.my_sensor
+        )
+    ]
+    when [
+        (
+            entity_id binary_sensor.my_sensor
+            state is '25°C'
+        )
+    ]
+    do [
+        (
+            light turn_on
+            entity_id binary_sensor.my_sensor
+        )
+    ]

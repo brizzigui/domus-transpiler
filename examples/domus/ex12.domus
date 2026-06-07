@@ -54,7 +54,8 @@ create 'Suite - movimento':
                         device_id 17577b83efd0951c4002cd6c7b91053c
                         entity_id bb97c45f407329aca067d3f274499a81
                         switch is_off
-                    ),
+                    )
+                    and
                     (
                         device_id 5e51e34745f04cf7f80d7a374d922d6f
                         entity_id 37dc24654a788314bfb4de2e2c827fd0
