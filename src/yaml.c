@@ -191,7 +191,7 @@ static void print_condition_item(FILE *out, Item *it, int indent) {
 
     if(has_trigger) {
         print_indented(out, indent, "- condition: trigger\n");
-        /* Bug 2 fix: collect all trigger values and emit as a proper list */
+        /* Collect all trigger values and emit as a proper list */
         int trigger_count = 0;
         for(Attr *p = a; p; p=p->next) {
             if(strcmp(p->key, "trigger")==0) trigger_count++;
@@ -250,7 +250,7 @@ static void print_condition_item(FILE *out, Item *it, int indent) {
         return;
     }
 
-    /* Bug 4 fix: fallback - emit as condition: state instead of empty condition: */
+    /* Fallback: emit as state condition instead of empty condition */
     print_indented(out, indent, "- condition: state\n");
     for(Attr *p = a; p; p=p->next) {
         /* For bare domain conditions like "alarm_control_panel disarmed",
@@ -266,18 +266,7 @@ static void print_condition_item(FILE *out, Item *it, int indent) {
 
 static void print_actions(FILE *out, Action *act, int indent);
 
-/*
- * Bug 1/5 fix: split a single ACT_SIMPLE action into multiple actions
- * when the attrs contain HA domain names that indicate a new action starts.
- *
- * The parser greedily consumes everything into one action, e.g.:
- *   switch turn_off entity_id X notify mobile_app message Y light turn_off entity_id Z
- * becomes one action with cmd=switch, subcmd=turn_off, and all subsequent
- * domain/subcmd pairs merged as attrs.
- *
- * We detect this by finding attrs where key is a HA domain name and value
- * looks like a command (or is NULL with next attr being a command).
- */
+/* Split greedy ACT_SIMPLE into multiple actions at HA domain boundaries */
 static void print_action_simple(FILE *out, Action *a, int indent) {
     /* Build a list of action segments by scanning attrs for domain boundaries */
     /* First action uses a->cmd and a->subcmd */
@@ -293,14 +282,7 @@ static void print_action_simple(FILE *out, Action *a, int indent) {
         for(Attr *p = a->attrs; p; p=p->next) attr_arr[i++] = p;
     }
 
-    /* Find split points: indices where a new action starts
-     * A new action starts when we see:
-     *   attr[i].key is a HA domain AND attr[i].value is not NULL
-     *   AND attr[i].value doesn't look like a data value (is_off, is_on, etc.)
-     * OR:
-     *   attr[i].key is a HA domain AND attr[i].value is NULL AND
-     *   attr[i+1] exists with value NULL (bare identifier = the subcmd)
-     */
+    /* Find split points for new actions based on HA domains */
     int *split_at = calloc(attr_count + 1, sizeof(int)); /* max possible splits */
     int num_splits = 0;
 
@@ -508,12 +490,12 @@ void emit_yaml(Automation *a, FILE *out) {
                 }
                 p = p->next;
                 while(p) {
-                    /* Bug 6 fix: convert domain/type attrs in device triggers */
+                    /* Convert domain/type attrs in device triggers */
                     if(is_trigger_domain(p->key) && p->value) {
                         print_attr_value(out, 4, "type", p->value);
                         print_attr_value(out, 4, "domain", p->key);
                     }
-                    /* Bug 7 fix: convert 'for' duration to HA dict format */
+                    /* Convert 'for' duration to HA dict format */
                     else if(strcmp(p->key, "for") == 0 && p->value) {
                         int h, m, s;
                         if(parse_duration(p->value, &h, &m, &s)) {
