@@ -86,6 +86,7 @@ listen_items:
 
 listen_item:
         LPAREN attr_list RPAREN { Item *it = ast_new_item(); ast_item_set_attrs(it, $2); $$ = it; }
+    | LPAREN error RPAREN { $$ = NULL; yyerrok; }
     ;
 
 condition_items:
@@ -96,6 +97,7 @@ condition_items:
 
 condition_item:
         LPAREN attr_list RPAREN { Item *it = ast_new_item(); ast_item_set_attrs(it, $2); $$ = it; }
+    | LPAREN error RPAREN { $$ = NULL; yyerrok; }
     ;
 
 /* attributes inside parentheses */
@@ -118,6 +120,7 @@ cond_unit:
         | LPAREN attr_seq RPAREN { Item *it = ast_new_item(); ast_item_set_attrs(it, $2); $$ = it; }
         | LBRACKET cond_seq RBRACKET { $$ = $2; }
         | attr_seq { Item *it = ast_new_item(); ast_item_set_attrs(it, $1); $$ = it; }
+        | LPAREN error RPAREN { $$ = NULL; yyerrok; }
         ;
 
 /* cond_seq: sequence of cond_unit joined by AND/OR */
@@ -220,6 +223,7 @@ action_items:
 
 action_item:
         LPAREN action_body RPAREN { $$ = $2; }
+    | LPAREN error RPAREN { $$ = NULL; yyerrok; }
     ;
 
 action_body:
@@ -270,12 +274,11 @@ simple_action:
 %%
 
 void yyerror(const char *s) {
-        fprintf(stderr, "Parse error: %s\n", s);
         fprintf(stderr, "Line %d: %s\n", yylineno, s);
 }
 
 int main(int argc, char **argv) {
-    yydebug = 1; /* debug on */
+    yydebug = 0; /* debug on */
     if (yyparse() == 0) {
         Automation *a = automations_head;
         while(a) {
