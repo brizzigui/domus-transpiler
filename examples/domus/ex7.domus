@@ -48,9 +48,7 @@ create 'Lavabo - 3o botão interruptor':
                     switch.sonoff_100200129d_1,
                     switch.espelho_do_lavabo
                 ]
-        ),
-        (
-            notify mobile_app_zfold4
-            message Lavabo
+                notify mobile_app_zfold4
+                message Lavabo
         )
     ]

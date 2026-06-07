@@ -17,6 +17,7 @@ create 'Sala - NSPanel controla painel LED TV':
             entity_id 2a3fe028eb0da3f11e73437fe3b34b5d
             switch turned_off
             id Desligado
+            alias 'Desativado '
         )
     ]
 

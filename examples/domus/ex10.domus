@@ -30,6 +30,16 @@ create 'Sala - movimento noturno':
         (
             time after 01:00:00
             time before 06:30:00
+        ),
+        (
+            device_id 9effd46c0c669c81be568b6baf21a14c
+            entity_id eea259ec8e8a95d09dd5c7d8619d1658
+            media_player is_off
+        ),
+        (
+            device_id 17577b83efd0951c4002cd6c7b91053c
+            entity_id bb97c45f407329aca067d3f274499a81
+            switch is_on
         )
     ]
 

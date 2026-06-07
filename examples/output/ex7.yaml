@@ -41,6 +41,6 @@
                 - switch.sonoff_100200129d_1
                 - switch.espelho_do_lavabo
               domain: switch
-    - action: notify.mobile_app_zfold4
-      data:
-        message: Lavabo
+            - action: notify.mobile_app_zfold4
+              data:
+                message: Lavabo

@@ -15,6 +15,7 @@
     type: turned_off
     domain: switch
     id: Desligado
+    alias: 'Desativado '
   conditions:
   - condition: device
     device_id: 5e51e34745f04cf7f80d7a374d922d6f

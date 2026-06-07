@@ -49,10 +49,18 @@ create 'Suite - movimento':
                 timer start
                 entity_id timer.suite
 
-                if (
-                    switch is_off
-                    device_id 17577b83efd0951c4002cd6c7b91053c
-                )
+                if [
+                    (
+                        device_id 17577b83efd0951c4002cd6c7b91053c
+                        entity_id bb97c45f407329aca067d3f274499a81
+                        switch is_off
+                    ),
+                    (
+                        device_id 5e51e34745f04cf7f80d7a374d922d6f
+                        entity_id 37dc24654a788314bfb4de2e2c827fd0
+                        alarm_control_panel is_disarmed
+                    )
+                ]
                     light turn_on
                     device_id 9920034bd1123c1923242b68c92e5d7d
                     entity_id 73f3f45361dd6dd6828b4f132cfcaa4a
