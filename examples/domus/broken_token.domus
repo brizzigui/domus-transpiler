@@ -1,0 +1,75 @@
+create 'Sala - porta de entrada':
+    id auto
+    description ''
+    mode !single
+
+    listen [
+        (
+            device
+            device_id 5ab340c52c9995f0bafbc6c0dc79812e
+            entity_id b729bfc5dc7003d3bca5d64247f8dfc6
+            binary_sensor opened
+            id Aberta
+        ),
+        (
+            device
+            device_id 5ab340c52c9995f0bafbc6c0dc79812e
+            entity_id b729bfc5dc7003d3bca5d64247f8dfc6
+            binary_sensor opened
+            for 00h01m00s
+            id 'Aberta 1 min'
+        ),
+        (
+            device
+            device_id 5ab340c52c9995f0bafbc6c0dc79812e
+            entity_id b729bfc5dc7003d3bca5d64247f8dfc6
+            binary_sensor not_opened
+            id Fechada
+        )
+    ]
+
+    when [
+    ]
+
+    do [
+        (
+            if [
+                (
+                    trigger is Aberta
+                )
+                and
+                (
+                    entity_id switch.luzes_da_sala
+                    state is 'off'
+                )
+                and
+                (
+                    device_id 9effd46c0c669c81be568b6baf21a14c
+                    entity_id eea259ec8e8a95d09dd5c7d8619d1658
+                    media_player is_off
+                )
+                and
+                (
+                    device_id d9c64e91476cb5a39d1fdf508673f900
+                    entity_id ccc6d60a59506b4beb48870f9263604a
+                    media_player is_off
+                )
+            ]
+                light turn_on
+                device_id 5f9afdf1309a0b93f968874d8987f9ff
+                entity_id 67a209bb0d8363e1f2526bdbba20ba71
+                notify mobile_app_zfold4
+                message 'Porta aberta e luz de entrada ligada!'
+        ),
+        (
+            if ( trigger is 'Aberta 1 min' )
+                notify send_message
+                message 'Porta aberta há mais de 1 minuto!'
+                entity_id [
+                    notify.echo_show_8_speak,
+                    notify.music_frame_alexa_speak
+                ]
+                notify mobile_app_zfold4
+                message 'Porta aberta por 1 minuto!'
+        )
+    ]

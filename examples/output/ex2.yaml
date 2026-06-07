@@ -1,4 +1,4 @@
-- id: 'auto'
+- id: '1780870264467'
   alias: Por do Sol
   description: 'Liga dispositivos em horários diferentes dependendo do clima (Chuva: -1h30, Nublado: -1h15, Sol: -45min)'
   mode: single

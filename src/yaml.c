@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include <sys/time.h>
 #include "yaml.h"
 
 static char **split_csv(const char *s, int *count) {
@@ -467,7 +468,19 @@ static void print_actions(FILE *out, Action *act, int indent) {
 
 void emit_yaml(Automation *a, FILE *out) {
     if(!a) return;
-    fprintf(out, "- id: '%s'\n", a->id ? a->id : "");
+    if(a->id && strcmp(a->id, "auto") == 0) {
+        struct timeval tv;
+        gettimeofday(&tv, NULL);
+        long long current = (long long)tv.tv_sec * 1000 + tv.tv_usec / 1000;
+        static long long last_id = 0;
+        if (current <= last_id) {
+            current = last_id + 1;
+        }
+        last_id = current;
+        fprintf(out, "- id: '%lld'\n", current);
+    } else {
+        fprintf(out, "- id: '%s'\n", a->id ? a->id : "");
+    }
     fprintf(out, "  alias: %s\n", a->alias ? a->alias : "");
     fprintf(out, "  description: '%s'\n", a->description ? a->description : "");
     if(a->mode) fprintf(out, "  mode: %s\n", a->mode);

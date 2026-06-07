@@ -1,4 +1,4 @@
-- id: 'auto'
+- id: '1780870264470'
   alias: Aviso Sonoro - Interruptor Ligado
   description: 'Avisa no Google Home quando o interruptor for ligado'
   mode: single
