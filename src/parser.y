@@ -21,6 +21,7 @@ Automation *cur_aut = NULL;
 }
 
 %debug
+%define parse.error verbose
 
 %union {
         char *str;
@@ -273,8 +274,18 @@ simple_action:
 
 %%
 
+extern char *yytext;
+int parser_error_count = 0;
 void yyerror(const char *s) {
-        fprintf(stderr, "Line %d: %s\n", yylineno, s);
+        if (parser_error_count == 0) {
+            fprintf(stderr, "--------------------------------------\n");
+            fprintf(stderr, "Compilation failed.\n");
+            fprintf(stderr, "No output file generated.\n");
+            fprintf(stderr, "--------------------------------------\n");
+            fprintf(stderr, "-> Error trace:\n");
+        }
+        fprintf(stderr, "\tLine %d: %s (near '%s')\n", yylineno, s, yytext);
+        parser_error_count++;
 }
 
 int main(int argc, char **argv) {
