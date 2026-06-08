@@ -24,6 +24,7 @@ create 'Sala - NSPanel controla painel LED TV':
     when [
         (
             device_id 5e51e34745f04cf7f80d7a374d922d6f
+            entity_id 37dc24654a788314bfb4de2e2c827fd0
             alarm_control_panel is_disarmed
         )
     ]

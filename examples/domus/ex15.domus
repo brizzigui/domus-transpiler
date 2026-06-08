@@ -36,7 +36,7 @@ create 'Eric -  movimento':
         ),
         (
             state
-            changes to 'on'
+            changes to 'off'
             entity_id binary_sensor.eric_motion_sensor_quarto
             id Liberado2
         )

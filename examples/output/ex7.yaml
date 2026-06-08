@@ -1,4 +1,4 @@
-- id: '1780870759746'
+- id: '1780883801957'
   alias: Lavabo - 3o botão interruptor
   description: ''
   mode: restart
@@ -24,23 +24,25 @@
       - condition: trigger
         id: Liga
       then:
-        - type: turn_on
-          entity_id:
-            - switch.espelho_do_lavabo
-            - switch.sonoff_100200129d_2
-          domain: switch
+        - action: switch.turn_on
+          target:
+            entity_id:
+              - switch.espelho_do_lavabo
+              - switch.sonoff_100200129d_2
+          data: {}
       else:
         - if:
           - condition: trigger
             id: Desliga
           then:
-            - type: turn_off
-              entity_id:
-                - switch.sonoff_100200129d_3
-                - switch.sonoff_100200129d_2
-                - switch.sonoff_100200129d_1
-                - switch.espelho_do_lavabo
-              domain: switch
+            - action: switch.turn_off
+              target:
+                entity_id:
+                  - switch.sonoff_100200129d_3
+                  - switch.sonoff_100200129d_2
+                  - switch.sonoff_100200129d_1
+                  - switch.espelho_do_lavabo
+              data: {}
             - action: notify.mobile_app_zfold4
               data:
                 message: Lavabo

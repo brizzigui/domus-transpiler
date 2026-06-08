@@ -1,4 +1,4 @@
-- id: '1780870759687'
+- id: '1780883801919'
   alias: Sala - movimento noturno
   description: ''
   mode: single
@@ -34,19 +34,21 @@
     type: is_on
     domain: switch
   actions:
-    - type: turn_on
-      entity_id: switch.ilha_interruptor_1
-      domain: switch
+    - action: switch.turn_on
+      target:
+        entity_id: switch.ilha_interruptor_1
+      data: {}
     - action: notify.mobile_app_zfold4
       data:
         message: 'Movimento noturno na sala '
     - delay:
-      hours: 0
-      minutes: 4
-      seconds: 0
-      milliseconds: 0
-    - type: turn_off
-      entity_id:
-        - switch.ilha_interruptor_1
-        - switch.sonoff_1001887e06_2
-      domain: switch
+        hours: 0
+        minutes: 4
+        seconds: 0
+        milliseconds: 0
+    - action: switch.turn_off
+      target:
+        entity_id:
+          - switch.ilha_interruptor_1
+          - switch.sonoff_1001887e06_2
+      data: {}

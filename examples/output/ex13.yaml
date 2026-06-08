@@ -1,4 +1,4 @@
-- id: '1780870759705'
+- id: '1780883801925'
   alias: Suite - ligar toalheiro
   description: ''
   mode: single
@@ -39,10 +39,10 @@
       entity_id: 5e57f3722928049f33c44caf233138cd
       domain: switch
     - delay:
-      hours: 0
-      minutes: 35
-      seconds: 0
-      milliseconds: 0
+        hours: 0
+        minutes: 35
+        seconds: 0
+        milliseconds: 0
     - type: turn_off
       device_id: 97b68274650665a6a725177e60ee469c
       entity_id: 5e57f3722928049f33c44caf233138cd

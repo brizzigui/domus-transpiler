@@ -306,31 +306,49 @@ static void print_action_simple(FILE *out, Action *a, int indent) {
     }
 
     /* Check if a domain should use action: format instead of type: */
+    int end = (num_splits > 0) ? split_at[0] : attr_count;
+    
     int is_service_domain = (a->cmd && (
         strcmp(a->cmd, "notify") == 0 ||
         strcmp(a->cmd, "tts") == 0 ||
-        strcmp(a->cmd, "alexa_devices") == 0
+        strcmp(a->cmd, "alexa_devices") == 0 ||
+        strcmp(a->cmd, "timer") == 0
     ));
+    
+    int has_device_id = 0;
+    int is_entity_list = 0;
+    for(int i = 0; i < end; i++) {
+        if(strcmp(attr_arr[i]->key, "device_id") == 0) has_device_id = 1;
+        if(strcmp(attr_arr[i]->key, "entity_id") == 0 && attr_arr[i]->value && strchr(attr_arr[i]->value, ',')) is_entity_list = 1;
+    }
+    if(!has_device_id || is_entity_list) {
+        is_service_domain = 1;
+    }
 
     /* Print the first action (using a->cmd / a->subcmd) */
     {
-        int end = (num_splits > 0) ? split_at[0] : attr_count;
         if(is_service_domain && a->subcmd) {
             /* Service-style action: action: domain.service */
             print_indented(out, indent, "- action: %s.%s\n", a->cmd, a->subcmd);
-            /* Separate entity_id (target) from data attrs */
-            int has_data_attrs = 0;
+            /* Separate entity_id/device_id (target) from data attrs */
+            int has_target_attrs = 0;
             for(int i = 0; i < end; i++) {
-                if(strcmp(attr_arr[i]->key, "entity_id") == 0) {
-                    print_indented(out, indent+2, "target:\n");
-                    print_attr_value(out, indent+4, "entity_id", attr_arr[i]->value);
-                } else {
-                    if(!has_data_attrs) {
-                        print_indented(out, indent+2, "data:\n");
-                        has_data_attrs = 1;
+                if(strcmp(attr_arr[i]->key, "entity_id") == 0 || strcmp(attr_arr[i]->key, "device_id") == 0) {
+                    if(!has_target_attrs) {
+                        print_indented(out, indent+2, "target:\n");
+                        has_target_attrs = 1;
                     }
                     print_attr_value(out, indent+4, attr_arr[i]->key, attr_arr[i]->value);
                 }
+            }
+            int has_data_attrs = 0;
+            for(int i = 0; i < end; i++) {
+                if(strcmp(attr_arr[i]->key, "entity_id") == 0 || strcmp(attr_arr[i]->key, "device_id") == 0) continue;
+                if(!has_data_attrs) {
+                    print_indented(out, indent+2, "data:\n");
+                    has_data_attrs = 1;
+                }
+                print_attr_value(out, indent+4, attr_arr[i]->key, attr_arr[i]->value);
             }
             if(!has_data_attrs) {
                 print_indented(out, indent+2, "data: {}\n");
@@ -368,23 +386,38 @@ static void print_action_simple(FILE *out, Action *a, int indent) {
         }
 
         /* Check if this is a notify-style action that should use action: format */
-        if(strcmp(new_domain, "notify") == 0 || strcmp(new_domain, "tts") == 0
-           || strcmp(new_domain, "alexa_devices") == 0) {
+        int is_svc = (strcmp(new_domain, "notify") == 0 || strcmp(new_domain, "tts") == 0
+           || strcmp(new_domain, "alexa_devices") == 0 || strcmp(new_domain, "timer") == 0);
+        int has_dev_id = 0;
+        int is_ent_list = 0;
+        for(int i = data_start; i < end; i++) {
+            if(strcmp(attr_arr[i]->key, "device_id") == 0) has_dev_id = 1;
+            if(strcmp(attr_arr[i]->key, "entity_id") == 0 && attr_arr[i]->value && strchr(attr_arr[i]->value, ',')) is_ent_list = 1;
+        }
+        if(!has_dev_id || is_ent_list) {
+            is_svc = 1;
+        }
+
+        if(is_svc) {
             print_indented(out, indent, "- action: %s.%s\n", new_domain, new_subcmd);
-            /* print data attrs, wrapping message etc. under data: */
-            int has_data_attrs = 0;
+            int has_target_attrs = 0;
             for(int i = data_start; i < end; i++) {
-                if(strcmp(attr_arr[i]->key, "entity_id") == 0) {
-                    /* entity_id goes under target: */
-                    print_indented(out, indent+2, "target:\n");
-                    print_attr_value(out, indent+4, "entity_id", attr_arr[i]->value);
-                } else {
-                    if(!has_data_attrs) {
-                        print_indented(out, indent+2, "data:\n");
-                        has_data_attrs = 1;
+                if(strcmp(attr_arr[i]->key, "entity_id") == 0 || strcmp(attr_arr[i]->key, "device_id") == 0) {
+                    if(!has_target_attrs) {
+                        print_indented(out, indent+2, "target:\n");
+                        has_target_attrs = 1;
                     }
                     print_attr_value(out, indent+4, attr_arr[i]->key, attr_arr[i]->value);
                 }
+            }
+            int has_data_attrs = 0;
+            for(int i = data_start; i < end; i++) {
+                if(strcmp(attr_arr[i]->key, "entity_id") == 0 || strcmp(attr_arr[i]->key, "device_id") == 0) continue;
+                if(!has_data_attrs) {
+                    print_indented(out, indent+2, "data:\n");
+                    has_data_attrs = 1;
+                }
+                print_attr_value(out, indent+4, attr_arr[i]->key, attr_arr[i]->value);
             }
             if(!has_data_attrs) {
                 print_indented(out, indent+2, "data: {}\n");
@@ -408,10 +441,10 @@ static void print_action_delay(FILE *out, Action *a, int indent) {
     const char *p = a->subcmd ? a->subcmd : "";
     sscanf(p, "%2dh%2dm%2ds%2dms", &h, &m, &s, &ms);
     print_indented(out, indent, "- delay:\n");
-    print_indented(out, indent+2, "hours: %d\n", h);
-    print_indented(out, indent+2, "minutes: %d\n", m);
-    print_indented(out, indent+2, "seconds: %d\n", s);
-    print_indented(out, indent+2, "milliseconds: %d\n", ms);
+    print_indented(out, indent+4, "hours: %d\n", h);
+    print_indented(out, indent+4, "minutes: %d\n", m);
+    print_indented(out, indent+4, "seconds: %d\n", s);
+    print_indented(out, indent+4, "milliseconds: %d\n", ms);
 }
 
 static void print_action_automation(FILE *out, Action *a, int indent) {

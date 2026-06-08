@@ -1,4 +1,4 @@
-- id: '1780870759736'
+- id: '1780883801945'
   alias: Suíte - cortinas
   description: ''
   mode: single
@@ -12,6 +12,7 @@
   conditions:
   - condition: device
     device_id: 5e51e34745f04cf7f80d7a374d922d6f
+    entity_id: 37dc24654a788314bfb4de2e2c827fd0
     type: is_disarmed
     domain: alarm_control_panel
   actions:

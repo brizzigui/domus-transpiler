@@ -45,10 +45,10 @@ create 'Nicole - movimento':
                 ]
                     switch turn_on
                     entity_id switch.sonoff_10026c409b_1
-                    type turn_on
+                    light turn_on
                     device_id 5bd4ebd22dcd5e84cf3e8570dbcc12f7
                     entity_id 7fdd514f2abd8ee085763019ba618a6a
-                    domain light
+                    brightness_pct 100
 
         ),
         (

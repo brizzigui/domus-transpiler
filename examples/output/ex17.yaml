@@ -1,4 +1,4 @@
-- id: '1780870759721'
+- id: '1780883801933'
   alias: Sala - movimento
   description: ''
   mode: restart
@@ -43,9 +43,10 @@
           - CozinhaMovimento
           - 'Movimento Pro'
       then:
-        - type: start
-          entity_id: timer.sala
-          domain: timer
+        - action: timer.start
+          target:
+            entity_id: timer.sala
+          data: {}
         - if:
           - condition: state
             entity_id: switch.sonoff_10018dee48_3
@@ -58,72 +59,87 @@
             entity_id: switch.luzes_da_sala
             state: 'off'
           - condition: device
-            device_id: 5e51e34745f04cf7f80d7a374d922d6f
-            type: is_disarmed
+            device_id: 9effd46c0c669c81be568b6baf21a14c
+            entity_id: eea259ec8e8a95d09dd5c7d8619d1658
+            type: is_off
             domain: media_player
           - condition: sun
             before: sunrise
             after: sunset
           then:
-            - type: turn_on
-              entity_id: switch.sonoff_10021a5971_2
-              domain: switch
+            - action: switch.turn_on
+              target:
+                entity_id: switch.sonoff_10021a5971_2
+              data: {}
             - delay:
-              hours: 0
-              minutes: 3
-              seconds: 0
-              milliseconds: 0
-            - type: turn_off
-              entity_id: switch.sonoff_10021a5971_2
-              domain: switch
-    - type: volume_set
-      entity_id: media_player.music_frame
-      volume_level: 0.09
-      domain: media_player
+                hours: 0
+                minutes: 3
+                seconds: 0
+                milliseconds: 0
+            - action: switch.turn_off
+              target:
+                entity_id: switch.sonoff_10021a5971_2
+              data: {}
+    - action: media_player.volume_set
+      target:
+        entity_id: media_player.music_frame
+      data:
+        volume_level: 0.09
     - if:
       - condition: trigger
         id: Movimento_ocioso
       then:
-        - type: volume_set
-          entity_id: media_player.music_frame_2
-          volume_level: 0.11
-          domain: media_player
-        - type: turn_off
-          entity_id: switch.sonoff_1002036351_1
-          domain: switch
-        - type: play_media
-          device_id: 1024b1c11e9d6da1d9e3082300842673
-          domain: media_player
-        - delay:
-          hours: 0
-          minutes: 1
-          seconds: 0
-          milliseconds: 0
-        - type: play_media
-          device_id: 1024b1c11e9d6da1d9e3082300842673
-          domain: media_player
-        - type: turn_off
-          entity_id: switch.sonoff_1002036186_2
-          domain: switch
-        - delay:
-          hours: 0
-          minutes: 1
-          seconds: 0
-          milliseconds: 0
-        - type: turn_off
-          entity_id: media_player.music_frame_2
-          domain: media_player
-        - type: turn_off
-          entity_id: switch.luzes_da_sala
-          domain: switch
-        - action: alexa_devices.send_text_command
+        - action: media_player.volume_set
+          target:
+            entity_id: media_player.music_frame_2
           data:
+            volume_level: 0.11
+        - action: switch.turn_off
+          target:
+            entity_id: switch.sonoff_1002036351_1
+          data: {}
+        - type: play_media
+          device_id: 1024b1c11e9d6da1d9e3082300842673
+          media_content_id: 'media-source://tts/tts.google_en_com?message=Aten%C3%A7%C3%A3o%21+As+luzes+da+sala+ser%C3%A3o+desligadas+em+1+minuto%21+Ligue+alguma+luz+ou+se+movimente.&language=pt'
+          media_content_type: 'audio/mp3'
+          domain: media_player
+        - delay:
+            hours: 0
+            minutes: 1
+            seconds: 0
+            milliseconds: 0
+        - type: play_media
+          device_id: 1024b1c11e9d6da1d9e3082300842673
+          media_content_id: 'media-source://tts/tts.google_en_com?message=Aten%C3%A7%C3%A3o%21+As+luzes+da+sala+ser%C3%A3o+desligadas+em+1+minuto%21+Ligue+alguma+luz+ou+se+movimente.&language=pt'
+          media_content_type: 'audio/mp3'
+          domain: media_player
+        - action: switch.turn_off
+          target:
+            entity_id: switch.sonoff_1002036186_2
+          data: {}
+        - delay:
+            hours: 0
+            minutes: 1
+            seconds: 0
+            milliseconds: 0
+        - action: media_player.turn_off
+          target:
+            entity_id: media_player.music_frame_2
+          data: {}
+        - action: switch.turn_off
+          target:
+            entity_id: switch.luzes_da_sala
+          data: {}
+        - action: alexa_devices.send_text_command
+          target:
             device_id: 38496a203273bbff294d6465d4042e55
+          data:
             text_command: 'desligar tela'
     - if:
       - condition: trigger
         id: Liberado
       then:
-        - type: start
-          entity_id: timer.sala
-          domain: timer
+        - action: timer.start
+          target:
+            entity_id: timer.sala
+          data: {}

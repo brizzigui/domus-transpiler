@@ -1,4 +1,4 @@
-- id: '1780870759699'
+- id: '1780883801923'
   alias: Suite - movimento
   description: ''
   mode: restart
@@ -33,9 +33,10 @@
           - 'Movimento cama'
           - Detector
       then:
-        - type: start
-          entity_id: timer.suite
-          domain: timer
+        - action: timer.start
+          target:
+            entity_id: timer.suite
+          data: {}
         - if:
           - condition: device
             device_id: 17577b83efd0951c4002cd6c7b91053c
@@ -61,30 +62,33 @@
           entity_id: e6bd5f71286d23ea1c87b580aea4407c
           domain: switch
         - delay:
-          hours: 0
-          minutes: 0
-          seconds: 30
-          milliseconds: 0
-        - type: turn_off
-          entity_id: light.arandela_suite
-          domain: light
+            hours: 0
+            minutes: 0
+            seconds: 30
+            milliseconds: 0
+        - action: light.turn_off
+          target:
+            entity_id: light.arandela_suite
+          data: {}
         - delay:
-          hours: 0
-          minutes: 0
-          seconds: 30
-          milliseconds: 0
-        - type: turn_off
-          entity_id: light.arandela_suite
-          domain: light
+            hours: 0
+            minutes: 0
+            seconds: 30
+            milliseconds: 0
+        - action: light.turn_off
+          target:
+            entity_id: light.arandela_suite
+          data: {}
         - type: turn_off
           device_id: 6fd6b17870c0345ad8bf36fb086fca49
           entity_id: 726fc9c450c2044cc6bf5b4d8508436c
           domain: switch
         - delay:
-          hours: 0
-          minutes: 0
-          seconds: 30
-          milliseconds: 0
-        - type: turn_off
-          entity_id: switch.luzes_da_suite
-          domain: switch
+            hours: 0
+            minutes: 0
+            seconds: 30
+            milliseconds: 0
+        - action: switch.turn_off
+          target:
+            entity_id: switch.luzes_da_suite
+          data: {}

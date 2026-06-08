@@ -18,7 +18,7 @@ create 'Aviso Sonoro - Interruptor Ligado':
         (
             tts speak
             entity_id tts.google_ai_tts
-            data.cache true
+            cache true
             media_player_entity_id media_player.cozinha_4
             message 'oi oi oi oi oi '
         ),

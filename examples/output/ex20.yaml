@@ -1,4 +1,4 @@
-- id: '1780870759731'
+- id: '1780883801940'
   alias: Sala - porta de entrada
   description: ''
   mode: single
@@ -56,12 +56,12 @@
         id: 'Aberta 1 min'
       then:
         - action: notify.send_message
-          data:
-            message: 'Porta aberta há mais de 1 minuto!'
           target:
             entity_id:
               - notify.echo_show_8_speak
               - notify.music_frame_alexa_speak
+          data:
+            message: 'Porta aberta há mais de 1 minuto!'
         - action: notify.mobile_app_zfold4
           data:
             message: 'Porta aberta por 1 minuto!'

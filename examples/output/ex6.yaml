@@ -1,4 +1,4 @@
-- id: '1780870759744'
+- id: '1780883801954'
   alias: Closet - movimento
   description: ''
   mode: restart
@@ -28,9 +28,10 @@
           - Movimento
           - Detectou
       then:
-        - type: start
-          entity_id: timer.closet
-          domain: timer
+        - action: timer.start
+          target:
+            entity_id: timer.closet
+          data: {}
         - if:
           - condition: device
             type: is_off

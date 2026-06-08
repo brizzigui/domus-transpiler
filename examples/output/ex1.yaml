@@ -1,4 +1,4 @@
-- id: '1780870759681'
+- id: '1780883801917'
   alias: Corda Corredor - movimento
   description: ''
   mode: restart
@@ -37,16 +37,16 @@
         before: 12:00:00
       then:
         - delay:
-          hours: 0
-          minutes: 0
-          seconds: 45
-          milliseconds: 0
+            hours: 0
+            minutes: 0
+            seconds: 45
+            milliseconds: 0
       else:
         - delay:
-          hours: 0
-          minutes: 1
-          seconds: 45
-          milliseconds: 0
+            hours: 0
+            minutes: 1
+            seconds: 45
+            milliseconds: 0
     - type: turn_off
       device_id: fbbfb3abd57bee6b19cc076ec0fd1b49
       entity_id: a4595b3013d5c452494f933e1e104129
