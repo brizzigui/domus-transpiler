@@ -1,0 +1,184 @@
+================================================================================
+  Gramática Livre de Contexto (GLC) — Domus Transpiler
+  Notação: BNF (Backus-Naur Form)
+================================================================================
+
+  Convenções:
+    - Não-terminais entre < >
+    - Terminais em MAIÚSCULAS (tokens) ou entre aspas simples/duplas
+    - ε  = cadeia vazia
+    - |  = alternativa
+    - ::= = produção
+
+================================================================================
+  TERMINAIS (tokens léxicos)
+================================================================================
+
+  Palavras reservadas:
+    CREATE, ID, DESCRIPTION, MODE, LISTEN, WHEN, DO,
+    IF, ELSE, AND, OR, NOT,
+    IS, AFTER, BEFORE, AT, FOR,
+    ANY, BELOW, ABOVE,
+    STATE, TIME,
+    DEVICE_ID, ENTITY_ID,
+    WITH, CHANGES, TO, FROM,
+    EVENT, OFFSET, SKIP_CONDITION,
+    AUTOMATION, TRIGGER, DELAY
+
+  Símbolos:
+    LBRACKET  =  '['
+    RBRACKET  =  ']'
+    LPAREN    =  '('
+    RPAREN    =  ')'
+    COLON     =  ':'
+    COMMA     =  ','
+    MINUS     =  '-'
+    PLUS      =  '+'
+
+  Literais:
+    STRING           ::= '\'' <caracteres> '\''
+    IDENTIFIER       ::= [A-Za-z_][A-Za-z0-9_.-]*  |  [0-9][A-Za-z0-9_.-]+
+    NUMBER           ::= [0-9]+
+    TIME_LITERAL     ::= [0-9]{2} ':' [0-9]{2} ':' [0-9]{2}
+    DURATION_LITERAL ::= '-'? [0-9]{2} 'h' [0-9]{2} 'm' [0-9]{2} 's' ([0-9]{2,3} 'ms')?
+
+================================================================================
+  PRODUÇÕES
+================================================================================
+
+<program> ::= ε
+            | <program> <automation>
+
+<automation> ::= CREATE STRING COLON <fields>
+
+<fields> ::= ε
+           | <fields> <field>
+
+<field> ::= ID STRING
+          | ID NUMBER
+          | ID IDENTIFIER
+          | DESCRIPTION STRING
+          | MODE IDENTIFIER
+          | LISTEN LBRACKET <listen_items> RBRACKET
+          | WHEN LBRACKET <condition_items> RBRACKET
+          | DO LBRACKET <action_items> RBRACKET
+
+--------------------------------------------------------------------------------
+  Triggers (listen)
+--------------------------------------------------------------------------------
+
+<listen_items> ::= ε
+                 | <listen_item>
+                 | <listen_items> COMMA <listen_item>
+
+<listen_item> ::= LPAREN <attr_list> RPAREN
+
+--------------------------------------------------------------------------------
+  Condições (when)
+--------------------------------------------------------------------------------
+
+<condition_items> ::= ε
+                    | <condition_item>
+                    | <condition_items> COMMA <condition_item>
+
+<condition_item> ::= LPAREN <attr_list> RPAREN
+
+--------------------------------------------------------------------------------
+  Atributos
+--------------------------------------------------------------------------------
+
+<attr_list> ::= ε
+              | <attr>
+              | <attr_list> <attr>
+
+<attr_seq> ::= <attr>
+             | <attr_seq> AND <attr>
+             | <attr_seq> OR <attr>
+
+<attr> ::= DEVICE_ID IDENTIFIER
+          | DEVICE_ID LBRACKET <id_list> RBRACKET
+          | ENTITY_ID IDENTIFIER
+          | ENTITY_ID LBRACKET <id_list> RBRACKET
+          | STATE IS IDENTIFIER
+          | STATE IS STRING
+          | TIME AFTER TIME_LITERAL
+          | TIME BEFORE TIME_LITERAL
+          | TIME AT TIME_LITERAL
+          | BEFORE IDENTIFIER
+          | AFTER IDENTIFIER
+          | STATE CHANGES <to_from> IDENTIFIER
+          | STATE CHANGES <to_from> STRING
+          | EVENT IDENTIFIER
+          | ID IDENTIFIER
+          | ID STRING
+          | TRIGGER IS IDENTIFIER
+          | TRIGGER IS STRING
+          | IDENTIFIER IS IDENTIFIER
+          | IDENTIFIER IDENTIFIER
+          | IDENTIFIER STRING
+          | IDENTIFIER LBRACKET <id_list> RBRACKET
+          | IDENTIFIER IS IDENTIFIER LBRACKET <id_list> RBRACKET
+          | STATE IS ANY LBRACKET <id_list> RBRACKET
+          | TRIGGER IS ANY LBRACKET <id_list> RBRACKET
+          | IDENTIFIER IS ANY LBRACKET <id_list> RBRACKET
+          | OFFSET DURATION_LITERAL
+          | FOR DURATION_LITERAL
+          | SKIP_CONDITION IDENTIFIER
+          | CHANGES <to_from> IDENTIFIER
+          | WITH IDENTIFIER LBRACKET <id_list> RBRACKET
+          | IDENTIFIER NUMBER
+          | ABOVE NUMBER
+          | BELOW NUMBER
+          | IDENTIFIER
+
+<to_from> ::= TO
+            | FROM
+
+<id_list> ::= STRING
+            | IDENTIFIER
+            | IDENTIFIER COMMA <id_list>
+            | STRING COMMA <id_list>
+
+--------------------------------------------------------------------------------
+  Condições compostas (usadas em IF)
+--------------------------------------------------------------------------------
+
+<cond_unit> ::= LPAREN <attr_list> RPAREN
+              | LPAREN <attr_seq> RPAREN
+              | LBRACKET <cond_seq> RBRACKET
+              | <attr_seq>
+
+<cond_seq> ::= <cond_unit>
+             | <cond_seq> AND <cond_unit>
+             | <cond_seq> OR <cond_unit>
+
+<condition_group> ::= <cond_seq>
+
+--------------------------------------------------------------------------------
+  Ações (do)
+--------------------------------------------------------------------------------
+
+<action_items> ::= <action_item>
+                 | <action_item> COMMA <action_items>
+
+<action_item> ::= LPAREN <action_body> RPAREN
+
+<action_body> ::= IF <condition_group> <action_block> <else_part>
+                | <simple_action>
+
+<action_stmt> ::= <simple_action>
+                | IF <condition_group> <action_block> <else_part>
+                | LPAREN <action_stmt> RPAREN
+
+<action_block> ::= ε
+                 | <action_stmt>
+                 | <action_block> <action_stmt>
+                 | <action_block> COMMA <action_stmt>
+
+<else_part> ::= ELSE IF <condition_group> <action_block> <else_part>
+              | ELSE <action_block>
+              | ε
+
+<simple_action> ::= DELAY DURATION_LITERAL
+                  | AUTOMATION TRIGGER <attr_list>
+                  | IDENTIFIER IDENTIFIER <attr_list>
