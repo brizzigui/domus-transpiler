@@ -103,23 +103,35 @@ create 'Sala - movimento':
             if ( trigger is Movimento_ocioso )
                 ( media_player volume_set
                   entity_id media_player.music_frame_2
+                  device_id 1024b1c11e9d6da1d9e3082300842673
                   volume_level 0.11 ),
                 ( switch turn_off
                   entity_id switch.sonoff_1002036351_1 ),
                 ( media_player play_media
                   device_id 1024b1c11e9d6da1d9e3082300842673
-                  media_content_id 'media-source://tts/tts.google_en_com?message=Aten%C3%A7%C3%A3o%21+As+luzes+da+sala+ser%C3%A3o+desligadas+em+1+minuto%21+Ligue+alguma+luz+ou+se+movimente.&language=pt'
-                  media_content_type 'audio/mp3' ),
+                  media.media_content_id 'media-source://tts/tts.google_en_com?message=Aten%C3%A7%C3%A3o%21+As+luzes+da+sala+ser%C3%A3o+desligadas+em+1+minuto%21+Ligue+alguma+luz+ou+se+movimente.&language=pt'
+                  media.media_content_type 'audio/mp3'
+                  media.metadata.title 'Atenção! As luzes da sala serão desligadas em 1 minuto! Ligue alguma luz ou se movimente.'
+                  media.metadata.thumbnail 'https://brands.home-assistant.io/_/google_translate/logo.png'
+                  media.metadata.media_class 'app'
+                  media.metadata.children_media_class ''
+                  media.metadata.browse_entity_id 'media_player.music_frame' ),
                 ( delay 00h01m00s00ms ),
                 ( media_player play_media
                   device_id 1024b1c11e9d6da1d9e3082300842673
-                  media_content_id 'media-source://tts/tts.google_en_com?message=Aten%C3%A7%C3%A3o%21+As+luzes+da+sala+ser%C3%A3o+desligadas+em+1+minuto%21+Ligue+alguma+luz+ou+se+movimente.&language=pt'
-                  media_content_type 'audio/mp3' ),
+                  media.media_content_id 'media-source://tts/tts.google_en_com?message=Aten%C3%A7%C3%A3o%21+As+luzes+da+sala+ser%C3%A3o+desligadas+em+1+minuto%21+Ligue+alguma+luz+ou+se+movimente.&language=pt'
+                  media.media_content_type 'audio/mp3'
+                  media.metadata.title 'Atenção! As luzes da sala serão desligadas em 1 minuto! Ligue alguma luz ou se movimente.'
+                  media.metadata.thumbnail 'https://brands.home-assistant.io/_/google_translate/logo.png'
+                  media.metadata.media_class 'app'
+                  media.metadata.children_media_class ''
+                  media.metadata.browse_entity_id 'media_player.music_frame' ),
                 ( switch turn_off
                   entity_id switch.sonoff_1002036186_2 ),
                 ( delay 00h01m00s00ms ),
                 ( media_player turn_off
-                  entity_id media_player.music_frame_2 ),
+                  entity_id media_player.music_frame_2
+                  enabled false ),
                 ( switch turn_off
                   entity_id switch.luzes_da_sala ),
                 ( alexa_devices send_text_command

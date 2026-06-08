@@ -1,4 +1,4 @@
-- id: '1780883801927'
+- id: '1780885278910'
   alias: Nicole - movimento
   description: ''
   mode: restart
@@ -64,9 +64,10 @@
             minutes: 1
             seconds: 0
             milliseconds: 0
-        - type: turn_off
-          device_id: afab14d6c5d511f765acf8ab4d133ef0
-          domain: media_player
+        - action: media_player.turn_off
+          target:
+            device_id: afab14d6c5d511f765acf8ab4d133ef0
+          data: {}
         - action: switch.turn_off
           target:
             entity_id:

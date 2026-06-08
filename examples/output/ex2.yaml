@@ -1,4 +1,4 @@
-- id: '1780883801938'
+- id: '1780885278932'
   alias: Por do Sol
   description: 'Liga dispositivos em horários diferentes dependendo do clima (Chuva: -1h30, Nublado: -1h15, Sol: -45min)'
   mode: single
@@ -31,8 +31,10 @@
           - snowy
       then:
         - action: automation.trigger
-          target.entity_id: automation.cozinha_ligar_luzes
-          data.skip_condition: true
+          target:
+            entity_id: automation.cozinha_ligar_luzes
+          data:
+            skip_condition: true
       else:
         - if:
           - condition: state
@@ -50,13 +52,17 @@
             domain: switch
           then:
             - action: automation.trigger
-              target.entity_id: automation.cozinha_ligar_luzes
-              data.skip_condition: true
+              target:
+                entity_id: automation.cozinha_ligar_luzes
+              data:
+                skip_condition: true
           else:
             - if:
               - condition: trigger
                 id: sol
               then:
                 - action: automation.trigger
-                  target.entity_id: automation.cozinha_ligar_luzes
-                  data.skip_condition: true
+                  target:
+                    entity_id: automation.cozinha_ligar_luzes
+                  data:
+                    skip_condition: true

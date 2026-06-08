@@ -88,7 +88,7 @@ static int parse_duration(const char *val, int *h, int *m, int *s) {
     return 0;
 }
 
-static void print_attr_value(FILE *out, int indent, const char *key, const char *val) {
+static void print_attr_value_leaf(FILE *out, int indent, const char *key, const char *val) {
     if(!val) {
         print_indented(out, indent, "%s: \n", key);
         return;
@@ -124,6 +124,67 @@ static void print_attr_value(FILE *out, int indent, const char *key, const char 
     } else {
         print_indented(out, indent, "%s: %s\n", key, val);
     }
+}
+
+static char **split_dot(const char *s, int *count) {
+    *count = 0;
+    if(!s) return NULL;
+    int dots = 0; for(const char *p=s; *p; ++p) if(*p=='.') dots++;
+    int n = dots + 1;
+    char **arr = calloc(n, sizeof(char*));
+    const char *start = s;
+    int idx = 0;
+    for(const char *p=s; ; ++p) {
+        if(*p=='.' || *p=='\0') {
+            size_t len = p - start;
+            char *t = malloc(len+1);
+            strncpy(t, start, len); t[len]='\0';
+            arr[idx++] = t;
+            if(*p=='\0') break;
+            start = p+1;
+        }
+    }
+    *count = n;
+    return arr;
+}
+
+static void print_nested_attr_value(FILE *out, int indent, const char *key, const char *val, char ***prev_parts_ptr, int *prev_count_ptr) {
+    int cur_count = 0;
+    char **cur_parts = split_dot(key, &cur_count);
+
+    char **prev_parts = prev_parts_ptr ? *prev_parts_ptr : NULL;
+    int prev_count = prev_count_ptr ? *prev_count_ptr : 0;
+
+    int common = 0;
+    if (prev_parts) {
+        while (common < prev_count && common < cur_count - 1 && strcmp(prev_parts[common], cur_parts[common]) == 0) {
+            common++;
+        }
+    }
+
+    for (int i = common; i < cur_count - 1; i++) {
+        print_indented(out, indent + i * 2, "%s:\n", cur_parts[i]);
+    }
+
+    const char *leaf_key = cur_parts[cur_count - 1];
+    int leaf_indent = indent + (cur_count - 1) * 2;
+    
+    print_attr_value_leaf(out, leaf_indent, leaf_key, val);
+
+    if (prev_parts) {
+        for (int i = 0; i < prev_count; i++) free(prev_parts[i]);
+        free(prev_parts);
+    }
+    if (prev_parts_ptr) *prev_parts_ptr = cur_parts;
+    else {
+        for (int i = 0; i < cur_count; i++) free(cur_parts[i]);
+        free(cur_parts);
+    }
+    if (prev_count_ptr) *prev_count_ptr = cur_count;
+}
+
+static void print_attr_value(FILE *out, int indent, const char *key, const char *val) {
+    print_nested_attr_value(out, indent, key, val, NULL, NULL);
 }
 
 static void print_condition_item(FILE *out, Item *it, int indent) {
@@ -312,7 +373,8 @@ static void print_action_simple(FILE *out, Action *a, int indent) {
         strcmp(a->cmd, "notify") == 0 ||
         strcmp(a->cmd, "tts") == 0 ||
         strcmp(a->cmd, "alexa_devices") == 0 ||
-        strcmp(a->cmd, "timer") == 0
+        strcmp(a->cmd, "timer") == 0 ||
+        strcmp(a->cmd, "media_player") == 0
     ));
     
     int has_device_id = 0;
@@ -341,29 +403,45 @@ static void print_action_simple(FILE *out, Action *a, int indent) {
                     print_attr_value(out, indent+4, attr_arr[i]->key, attr_arr[i]->value);
                 }
             }
-            int has_data_attrs = 0;
+            /* Print top-level attributes */
             for(int i = 0; i < end; i++) {
-                if(strcmp(attr_arr[i]->key, "entity_id") == 0 || strcmp(attr_arr[i]->key, "device_id") == 0) continue;
+                if(strcmp(attr_arr[i]->key, "enabled") == 0 || strcmp(attr_arr[i]->key, "continue_on_error") == 0) {
+                    print_attr_value(out, indent+2, attr_arr[i]->key, attr_arr[i]->value);
+                }
+            }
+            int has_data_attrs = 0;
+            char **prev_parts = NULL;
+            int prev_count = 0;
+            for(int i = 0; i < end; i++) {
+                if(strcmp(attr_arr[i]->key, "entity_id") == 0 || strcmp(attr_arr[i]->key, "device_id") == 0 || strcmp(attr_arr[i]->key, "enabled") == 0 || strcmp(attr_arr[i]->key, "continue_on_error") == 0) continue;
                 if(!has_data_attrs) {
                     print_indented(out, indent+2, "data:\n");
                     has_data_attrs = 1;
                 }
-                print_attr_value(out, indent+4, attr_arr[i]->key, attr_arr[i]->value);
+                print_nested_attr_value(out, indent+4, attr_arr[i]->key, attr_arr[i]->value, &prev_parts, &prev_count);
+            }
+            if (prev_parts) {
+                for (int i = 0; i < prev_count; i++) free(prev_parts[i]);
+                free(prev_parts);
             }
             if(!has_data_attrs) {
                 print_indented(out, indent+2, "data: {}\n");
             }
         } else if(a->subcmd) {
             print_indented(out, indent, "- type: %s\n", a->subcmd);
+            char **prev_parts = NULL; int prev_count = 0;
             for(int i = 0; i < end; i++) {
-                print_attr_value(out, indent+2, attr_arr[i]->key, attr_arr[i]->value);
+                print_nested_attr_value(out, indent+2, attr_arr[i]->key, attr_arr[i]->value, &prev_parts, &prev_count);
             }
+            if (prev_parts) { for (int i = 0; i < prev_count; i++) free(prev_parts[i]); free(prev_parts); }
             if(a->cmd) print_attr_value(out, indent+2, "domain", a->cmd);
         } else {
             print_indented(out, indent, "- action: %s\n", a->cmd ? a->cmd : "");
+            char **prev_parts = NULL; int prev_count = 0;
             for(int i = 0; i < end; i++) {
-                print_attr_value(out, indent+2, attr_arr[i]->key, attr_arr[i]->value);
+                print_nested_attr_value(out, indent+2, attr_arr[i]->key, attr_arr[i]->value, &prev_parts, &prev_count);
             }
+            if (prev_parts) { for (int i = 0; i < prev_count; i++) free(prev_parts[i]); free(prev_parts); }
         }
     }
 
@@ -387,7 +465,8 @@ static void print_action_simple(FILE *out, Action *a, int indent) {
 
         /* Check if this is a notify-style action that should use action: format */
         int is_svc = (strcmp(new_domain, "notify") == 0 || strcmp(new_domain, "tts") == 0
-           || strcmp(new_domain, "alexa_devices") == 0 || strcmp(new_domain, "timer") == 0);
+           || strcmp(new_domain, "alexa_devices") == 0 || strcmp(new_domain, "timer") == 0
+           || strcmp(new_domain, "media_player") == 0);
         int has_dev_id = 0;
         int is_ent_list = 0;
         for(int i = data_start; i < end; i++) {
@@ -410,23 +489,37 @@ static void print_action_simple(FILE *out, Action *a, int indent) {
                     print_attr_value(out, indent+4, attr_arr[i]->key, attr_arr[i]->value);
                 }
             }
-            int has_data_attrs = 0;
+            /* Print top-level attributes */
             for(int i = data_start; i < end; i++) {
-                if(strcmp(attr_arr[i]->key, "entity_id") == 0 || strcmp(attr_arr[i]->key, "device_id") == 0) continue;
+                if(strcmp(attr_arr[i]->key, "enabled") == 0 || strcmp(attr_arr[i]->key, "continue_on_error") == 0) {
+                    print_attr_value(out, indent+2, attr_arr[i]->key, attr_arr[i]->value);
+                }
+            }
+            int has_data_attrs = 0;
+            char **prev_parts = NULL;
+            int prev_count = 0;
+            for(int i = data_start; i < end; i++) {
+                if(strcmp(attr_arr[i]->key, "entity_id") == 0 || strcmp(attr_arr[i]->key, "device_id") == 0 || strcmp(attr_arr[i]->key, "enabled") == 0 || strcmp(attr_arr[i]->key, "continue_on_error") == 0) continue;
                 if(!has_data_attrs) {
                     print_indented(out, indent+2, "data:\n");
                     has_data_attrs = 1;
                 }
-                print_attr_value(out, indent+4, attr_arr[i]->key, attr_arr[i]->value);
+                print_nested_attr_value(out, indent+4, attr_arr[i]->key, attr_arr[i]->value, &prev_parts, &prev_count);
+            }
+            if (prev_parts) {
+                for (int i = 0; i < prev_count; i++) free(prev_parts[i]);
+                free(prev_parts);
             }
             if(!has_data_attrs) {
                 print_indented(out, indent+2, "data: {}\n");
             }
         } else {
             print_indented(out, indent, "- type: %s\n", new_subcmd);
+            char **prev_parts = NULL; int prev_count = 0;
             for(int i = data_start; i < end; i++) {
-                print_attr_value(out, indent+2, attr_arr[i]->key, attr_arr[i]->value);
+                print_nested_attr_value(out, indent+2, attr_arr[i]->key, attr_arr[i]->value, &prev_parts, &prev_count);
             }
+            if (prev_parts) { for (int i = 0; i < prev_count; i++) free(prev_parts[i]); free(prev_parts); }
             print_attr_value(out, indent+2, "domain", new_domain);
         }
     }
@@ -452,8 +545,18 @@ static void print_action_automation(FILE *out, Action *a, int indent) {
     /* find entity_id and skip_condition */
     Attr *p = a->attrs;
     while(p) {
-        if(strcmp(p->key, "entity_id")==0) print_attr_value(out, indent+2, "target.entity_id", p->value);
-        else if(strcmp(p->key, "skip_condition")==0) print_attr_value(out, indent+2, "data.skip_condition", p->value);
+        if(strcmp(p->key, "entity_id")==0) {
+            print_indented(out, indent+2, "target:\n");
+            print_attr_value(out, indent+4, "entity_id", p->value);
+        }
+        p = p->next;
+    }
+    p = a->attrs;
+    while(p) {
+        if(strcmp(p->key, "skip_condition")==0) {
+            print_indented(out, indent+2, "data:\n");
+            print_attr_value(out, indent+4, "skip_condition", p->value);
+        }
         p = p->next;
     }
 }
