@@ -1,4 +1,4 @@
-create 'Sala - porta de entrada':
+create 'Token Error 1':
     id auto
     description ''
     mode !single

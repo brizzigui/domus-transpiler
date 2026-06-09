@@ -1,0 +1,17 @@
+create 'Semantic Error 2':
+    listen [
+        (
+            time
+            at 05:00:00
+        )
+    ]
+
+    when [
+    ]
+
+    do [
+        (
+            light turn_on
+            entity_id switch.my_switch
+        )
+    ]

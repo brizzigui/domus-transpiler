@@ -19,5 +19,13 @@ run: domus-transpiler
 		echo "Generating $$n.yaml"; \
 		./domus-transpiler < $$f > examples/output/$$n.yaml; \
 	done
+
+errors: domus-transpiler
+	@for f in examples/domus/broken/*.domus; do \
+		echo "--- Testing $$f ---"; \
+		./domus-transpiler < $$f; \
+		echo ""; \
+	done
+
 clean:
 	rm -f domus-transpiler src/parser.tab.c src/parser.tab.h src/lexer.yy.c out1.yaml out2.yaml

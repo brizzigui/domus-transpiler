@@ -1,4 +1,4 @@
-create 'Test Semantic Error':
+create 'Semantic Error 1':
     listen [
         (
             state

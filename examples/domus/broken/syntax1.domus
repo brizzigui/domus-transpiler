@@ -1,4 +1,4 @@
-create 'Sala - desligar LED sanca':
+create 'Syntax Error 1':
     id auto
     description ''
     mode single
