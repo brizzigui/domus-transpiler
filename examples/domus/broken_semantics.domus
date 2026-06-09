@@ -2,7 +2,7 @@ create 'Test Semantic Error':
     listen [
         (
             state
-            changes to 'on'
+            changes to sixseven
             entity_id binary_sensor.my_sensor
         )
     ]

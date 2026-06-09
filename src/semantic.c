@@ -100,7 +100,7 @@ static const char* get_entity_id(Attr *attrs) {
 
 static void pass2_attr(Attr *attr, int line, const char *entity_context) {
     while (attr) {
-        if (strcmp(attr->key, "state") == 0 && attr->value != NULL) {
+        if ((strcmp(attr->key, "state") == 0 || strcmp(attr->key, "to") == 0 || strcmp(attr->key, "from") == 0) && attr->value != NULL) {
             if (entity_context) {
                 Symbol *s = symtab_lookup(entity_context);
                 if (s) {
