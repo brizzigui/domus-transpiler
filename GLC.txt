@@ -1,9 +1,8 @@
 ================================================================================
-  Gramática Livre de Contexto (GLC) — Domus Transpiler
-  Notação: BNF (Backus-Naur Form)
+  Gramática Livre de Contexto (GLC) da Linguagem Domus
 ================================================================================
 
-  Convenções:
+  Está representada em BNF, com as seguintes convenções:
     - Não-terminais entre < >
     - Terminais em MAIÚSCULAS (tokens) ou entre aspas simples/duplas
     - ε  = cadeia vazia
