@@ -9,6 +9,7 @@ create 'Sala - movimento':
             changes to idle
             entity_id timer.sala
             id Movimento_ocioso
+            alias 'Movimento Ocioso'
         ),
         (
             state
@@ -68,6 +69,7 @@ create 'Sala - movimento':
                     and
                     (
                         device_id 5e51e34745f04cf7f80d7a374d922d6f
+                        entity_id 37dc24654a788314bfb4de2e2c827fd0
                         alarm_control_panel is_disarmed
                     )
                     and
@@ -80,6 +82,7 @@ create 'Sala - movimento':
                         device_id 9effd46c0c669c81be568b6baf21a14c
                         entity_id eea259ec8e8a95d09dd5c7d8619d1658
                         media_player is_off
+                        enabled true
                     )
                     and
                     (
@@ -115,6 +118,11 @@ create 'Sala - movimento':
                   media.metadata.thumbnail 'https://brands.home-assistant.io/_/google_translate/logo.png'
                   media.metadata.media_class 'app'
                   media.metadata.children_media_class ''
+                  media.metadata.navigateIds.0 '{}'
+                  media.metadata.navigateIds.1.media_content_type 'app'
+                  media.metadata.navigateIds.1.media_content_id 'media-source://tts'
+                  media.metadata.navigateIds.2.media_content_type 'audio/mp3'
+                  media.metadata.navigateIds.2.media_content_id 'media-source://tts/tts.google_en_com?message=Aten%C3%A7%C3%A3o%21+As+luzes+da+sala+ser%C3%A3o+desligadas+em+1+minuto%21+Ligue+alguma+luz+ou+se+movimente.&language=pt'
                   media.metadata.browse_entity_id 'media_player.music_frame' ),
                 ( delay 00h01m00s00ms ),
                 ( media_player play_media
@@ -125,6 +133,11 @@ create 'Sala - movimento':
                   media.metadata.thumbnail 'https://brands.home-assistant.io/_/google_translate/logo.png'
                   media.metadata.media_class 'app'
                   media.metadata.children_media_class ''
+                  media.metadata.navigateIds.0 '{}'
+                  media.metadata.navigateIds.1.media_content_type 'app'
+                  media.metadata.navigateIds.1.media_content_id 'media-source://tts'
+                  media.metadata.navigateIds.2.media_content_type 'audio/mp3'
+                  media.metadata.navigateIds.2.media_content_id 'media-source://tts/tts.google_en_com?message=Aten%C3%A7%C3%A3o%21+As+luzes+da+sala+ser%C3%A3o+desligadas+em+1+minuto%21+Ligue+alguma+luz+ou+se+movimente.&language=pt'
                   media.metadata.browse_entity_id 'media_player.music_frame' ),
                 ( switch turn_off
                   entity_id switch.sonoff_1002036186_2 ),

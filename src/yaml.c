@@ -88,9 +88,18 @@ static int parse_duration(const char *val, int *h, int *m, int *s) {
     return 0;
 }
 
-static void print_attr_value_leaf(FILE *out, int indent, const char *key, const char *val) {
+static int is_numeric(const char *s) {
+    if (!s || !*s) return 0;
+    while(*s) { if(!isdigit((unsigned char)*s)) return 0; s++; }
+    return 1;
+}
+
+static void print_attr_value_leaf(FILE *out, int indent, int skip_indent, const char *key, const char *val) {
     if(!val) {
-        print_indented(out, indent, "%s: \n", key);
+        if (key && is_numeric(key))
+            print_indented(out, skip_indent ? 0 : indent, "-\n");
+        else
+            print_indented(out, skip_indent ? 0 : indent, "%s: \n", key);
         return;
     }
     /* special-case: convert duration-style offsets (e.g. -01h15m00s) to colon format (-01:15:00) */
@@ -106,9 +115,9 @@ static void print_attr_value_leaf(FILE *out, int indent, const char *key, const 
             int m = (s[3]-'0')*10 + (s[4]-'0');
             int sec = (s[6]-'0')*10 + (s[7]-'0');
             if(sign)
-                print_indented(out, indent, "%s: %c%02d:%02d:%02d\n", key, sign, h, m, sec);
+                print_indented(out, skip_indent ? 0 : indent, "%s: %c%02d:%02d:%02d\n", key, sign, h, m, sec);
             else
-                print_indented(out, indent, "%s: %02d:%02d:%02d\n", key, h, m, sec);
+                print_indented(out, skip_indent ? 0 : indent, "%s: %02d:%02d:%02d\n", key, h, m, sec);
             return;
         }
         /* fallthrough to default printing if pattern doesn't match */
@@ -116,13 +125,29 @@ static void print_attr_value_leaf(FILE *out, int indent, const char *key, const 
     /* if comma separated, print YAML list */
     if(strchr(val, ',')) {
         int n; char **arr = split_csv(val, &n);
-        print_indented(out, indent, "%s:\n", key);
+        if (key && is_numeric(key))
+            print_indented(out, skip_indent ? 0 : indent, "-\n");
+        else
+            print_indented(out, skip_indent ? 0 : indent, "%s:\n", key);
         for(int i=0;i<n;i++) {
-            print_indented(out, indent+2, "- %s\n", arr[i]);
+            if (strcmp(arr[i], "'{}'") == 0)
+                print_indented(out, indent+2, "- {}\n");
+            else
+                print_indented(out, indent+2, "- %s\n", arr[i]);
         }
         free_csv(arr, n);
     } else {
-        print_indented(out, indent, "%s: %s\n", key, val);
+        if (key && is_numeric(key)) {
+            if (strcmp(val, "'{}'") == 0)
+                print_indented(out, skip_indent ? 0 : indent, "- {}\n");
+            else
+                print_indented(out, skip_indent ? 0 : indent, "- %s\n", val);
+        } else {
+            if (strcmp(val, "'{}'") == 0)
+                print_indented(out, skip_indent ? 0 : indent, "%s: {}\n", key);
+            else
+                print_indented(out, skip_indent ? 0 : indent, "%s: %s\n", key, val);
+        }
     }
 }
 
@@ -162,14 +187,21 @@ static void print_nested_attr_value(FILE *out, int indent, const char *key, cons
         }
     }
 
+    int skip_indent = 0;
     for (int i = common; i < cur_count - 1; i++) {
-        print_indented(out, indent + i * 2, "%s:\n", cur_parts[i]);
+        if (is_numeric(cur_parts[i])) {
+            print_indented(out, skip_indent ? 0 : indent + i * 2, "- ");
+            skip_indent = 1;
+        } else {
+            print_indented(out, skip_indent ? 0 : indent + i * 2, "%s:\n", cur_parts[i]);
+            skip_indent = 0;
+        }
     }
 
     const char *leaf_key = cur_parts[cur_count - 1];
     int leaf_indent = indent + (cur_count - 1) * 2;
     
-    print_attr_value_leaf(out, leaf_indent, leaf_key, val);
+    print_attr_value_leaf(out, leaf_indent, skip_indent, leaf_key, val);
 
     if (prev_parts) {
         for (int i = 0; i < prev_count; i++) free(prev_parts[i]);
