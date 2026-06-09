@@ -44,7 +44,7 @@ Automation *cur_aut = NULL;
 %type <item> listen_item condition_item cond_unit
 %type <items> listen_items condition_items condition_group cond_seq
 %type <alist> attr_seq
-%type <str> id_list
+%type <str> id_list to_from
 %type <action> action_items action_item action_body action_block else_part simple_action action_stmt
 %type <automation> automation
 
@@ -132,8 +132,8 @@ cond_seq:
         ;
 
 to_from:
-    TO
-    | FROM
+    TO { $$ = "to"; }
+    | FROM { $$ = "from"; }
     ;
 
 attr:
@@ -157,11 +157,19 @@ attr:
     }
     | BEFORE IDENTIFIER { $$ = ast_new_attr(yylineno, "before", $2); }
     | AFTER IDENTIFIER { $$ = ast_new_attr(yylineno, "after", $2); }
-    | STATEKW CHANGES to_from IDENTIFIER { $$ = ast_new_attr(yylineno, "state", $4); }
+    | STATEKW CHANGES to_from IDENTIFIER {
+        Attr *st = ast_new_attr(yylineno, "state", NULL);
+        Attr *tf = ast_new_attr(yylineno, $3, $4);
+        st->next = tf;
+        $$ = st;
+    }
     | STATEKW CHANGES to_from STRING {
         char *quoted = malloc(strlen($4) + 3); /* ' + string + ' + \0 */
         sprintf(quoted, "'%s'", $4);
-        $$ = ast_new_attr(yylineno, "state", quoted);
+        Attr *st = ast_new_attr(yylineno, "state", NULL);
+        Attr *tf = ast_new_attr(yylineno, $3, quoted);
+        st->next = tf;
+        $$ = st;
     }
     | EVENT IDENTIFIER { $$ = ast_new_attr(yylineno, "event", $2); }
     | ID IDENTIFIER { $$ = ast_new_attr(yylineno, "id", $2); }
@@ -191,7 +199,7 @@ attr:
     | OFFSET DURATION_LITERAL { $$ = ast_new_attr(yylineno, "offset", $2); }
     | FOR DURATION_LITERAL { $$ = ast_new_attr(yylineno, "for", $2); }
     | SKIP_CONDITION IDENTIFIER { $$ = ast_new_attr(yylineno, "skip_condition", $2); }
-    | CHANGES to_from IDENTIFIER { $$ = ast_new_attr(yylineno, "changes_to", $3); }
+    | CHANGES to_from IDENTIFIER { $$ = ast_new_attr(yylineno, $2, $3); }
     | WITH IDENTIFIER LBRACKET id_list RBRACKET { $$ = ast_new_attr(yylineno, $2, $4); }
     | IDENTIFIER NUMBER { $$ = ast_new_attr(yylineno, $1, $2); }
     | ABOVE NUMBER { $$ = ast_new_attr(yylineno, "above", $2); }

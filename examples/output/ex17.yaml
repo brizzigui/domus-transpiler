@@ -1,4 +1,4 @@
-- id: '1780964966247'
+- id: '1780966210819'
   alias: Sala - movimento
   description: ''
   mode: restart
@@ -29,7 +29,7 @@
     entity_id: binary_sensor.corredor_motion_sensor_pro_movimento
     id: Liberado
   - trigger: state
-    to: 'on'
+    from: 'on'
     entity_id: light.luzes_da_sala
     id: 'Luzes ligada'
   conditions:
